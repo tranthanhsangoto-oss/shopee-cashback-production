@@ -1,0 +1,815 @@
+<!doctype html><html lang="vi"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Shopee Cashback</title><style>
+:root{
+  --brand:#ee4d2d;--brand2:#ff7454;--bg:#f6f7fb;--card:#fff;--text:#202634;--muted:#747d8f;
+  --line:#e8ebf1;--ok:#138a56;--warn:#b97900;--bad:#c83a3a;--shadow:0 12px 34px rgba(30,40,60,.08);
+}
+*{box-sizing:border-box}
+body{margin:0;font-family:Inter,ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;background:var(--bg);color:var(--text)}
+button,input,select,textarea{font:inherit}button{cursor:pointer}
+.wrap{max-width:1050px;margin:0 auto;min-height:100vh;padding-bottom:92px}
+.topbar{position:sticky;top:0;z-index:10;background:rgba(246,247,251,.94);backdrop-filter:blur(12px);border-bottom:1px solid var(--line);padding:13px 16px;display:flex;align-items:center;justify-content:space-between}
+.brand{display:flex;align-items:center;gap:10px;font-weight:900}
+.logo{width:38px;height:38px;border-radius:12px;background:linear-gradient(135deg,var(--brand),var(--brand2));color:#fff;display:grid;place-items:center;font-weight:900}
+.actions{display:flex;align-items:center;gap:8px;position:relative}
+.icon-btn,.avatar-btn{border:1px solid var(--line);background:#fff;border-radius:13px;min-height:40px}
+.icon-btn{width:40px;display:grid;place-items:center;position:relative}
+.avatar-btn{display:flex;align-items:center;gap:8px;padding:5px 9px 5px 6px}
+.avatar{width:30px;height:30px;border-radius:10px;background:#fff0ec;color:var(--brand);display:grid;place-items:center;font-weight:900}
+.badge{position:absolute;right:-3px;top:-4px;background:var(--brand);color:#fff;border:2px solid #fff;border-radius:99px;min-width:18px;height:18px;padding:0 4px;display:grid;place-items:center;font-size:10px;font-weight:900}
+.page{padding:20px 16px}.hidden{display:none!important}
+.card{background:#fff;border:1px solid var(--line);border-radius:20px;padding:17px;box-shadow:var(--shadow)}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+h1{font-size:28px;margin:7px 0 9px;line-height:1.12}h2{font-size:20px;margin:0 0 13px}
+p{color:var(--muted);line-height:1.6}.muted{color:var(--muted);font-size:13px}.tiny{font-size:11px;color:var(--muted)}
+.eyebrow{font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--brand);font-weight:900}
+.btn{border:0;border-radius:13px;padding:12px 14px;font-weight:850}.primary{background:var(--brand);color:#fff}.ghost{background:#fff;border:1px solid var(--line);color:var(--text)}.soft{background:#fff0ec;color:var(--brand)}
+.full{width:100%}.btn:disabled{opacity:.45;cursor:not-allowed}
+.field label{display:block;font-size:11px;font-weight:850;color:var(--muted);margin-bottom:5px}.field input,.field select,.field textarea{width:100%;padding:11px 12px;border:1px solid var(--line);border-radius:12px;background:#fff}.field textarea{min-height:95px;resize:vertical}
+.bank-picker{position:relative}
+.bank-results{position:absolute;left:0;right:0;top:calc(100% + 5px);background:#fff;border:1px solid var(--line);border-radius:14px;box-shadow:0 14px 32px rgba(20,30,50,.16);z-index:60;max-height:270px;overflow:auto;padding:5px}
+.bank-option{width:100%;border:0;background:#fff;padding:9px;border-radius:10px;display:flex;align-items:center;gap:9px;text-align:left}
+.bank-option:hover{background:#f7f8fb}
+.bank-option img{width:36px;height:36px;object-fit:contain;border:1px solid var(--line);border-radius:9px;padding:3px;background:#fff}
+.bank-selected{display:flex;align-items:center;gap:8px;margin-top:7px;min-height:30px}
+
+.row{display:flex;gap:9px;align-items:center}.row>*{min-width:0}.grow{flex:1}
+.nav{position:fixed;left:50%;transform:translateX(-50%);bottom:12px;width:min(94%,700px);background:rgba(255,255,255,.96);border:1px solid var(--line);box-shadow:0 15px 38px rgba(30,40,60,.17);border-radius:20px;padding:6px;display:grid;grid-template-columns:repeat(3,1fr);z-index:20}
+.nav button{border:0;background:transparent;border-radius:14px;padding:8px 4px;font-size:12px;font-weight:800;color:var(--muted)}.nav button.active{background:#fff0ec;color:var(--brand)}
+.stat{border-radius:18px;padding:16px;border:1px solid transparent}.stat .lab{font-size:12px;font-weight:850}.stat .val{font-size:28px;font-weight:950;letter-spacing:-.035em;margin-top:7px}.stat .desc{font-size:10px;line-height:1.45;margin-top:7px}
+.stat.wait{background:#fff6df;border-color:#f3db9e;color:#7b580e}.stat.avail{background:#fff0eb;border-color:#ffc8b8;color:#a33820;box-shadow:0 10px 24px rgba(238,77,45,.11)}.stat.received{background:#eaf8f1;border-color:#c7e9d8;color:#196c49}
+.tier-progress-wrap{margin-top:14px}
+.tier-progress-head{display:flex;justify-content:space-between;gap:10px;align-items:end;margin-bottom:7px}
+.tier-progress-track{height:11px;background:#eef0f4;border-radius:999px;overflow:hidden}
+.tier-progress-bar{height:100%;width:0;background:linear-gradient(90deg,#ee4d2d,#ff8c70);border-radius:999px;transition:width .25s ease}
+.tier-progress-pct{font-size:18px;font-weight:950;color:var(--brand)}
+.status{display:inline-flex;padding:5px 8px;border-radius:99px;font-size:10px;font-weight:900}.s-pending{background:#fff4dc;color:#8b6000}.s-ok{background:#e7f6ee;color:#117246}.s-bad{background:#ffeded;color:#b53131}.s-info{background:#edf3ff;color:#3560a5}
+.order{display:grid;grid-template-columns:60px 1fr auto;gap:12px;align-items:start;padding:13px 0;border-bottom:1px solid var(--line)}.order:last-child{border-bottom:0}.thumb{width:60px;height:60px;border-radius:14px;background:#fff1ec;display:grid;place-items:center;font-size:22px}.amount{text-align:right;font-weight:900}
+.pop{position:absolute;right:0;top:47px;width:310px;background:#fff;border:1px solid var(--line);border-radius:18px;padding:9px;box-shadow:0 18px 44px rgba(30,40,60,.18);z-index:40}.pop-title{font-size:11px;font-weight:900;color:var(--muted);padding:6px 8px}.pop-item{padding:10px 8px;border-bottom:1px solid var(--line)}.pop-item:last-child{border-bottom:0}
+.menu-btn{width:100%;text-align:left;border:0;background:transparent;padding:10px;border-radius:11px}.menu-btn:hover{background:#f7f8fb}.danger{color:#b53131}
+.dev{border:1px dashed #e3a392;background:#fff9f6;border-radius:18px;padding:15px;margin-top:14px}.dev h3{font-size:14px;margin:0 0 10px;color:#9a3c25}.devtag{display:inline-flex;background:#202634;color:#fff;border-radius:99px;padding:4px 7px;font-size:9px;font-weight:900;margin-left:6px}
+.table{width:100%;border-collapse:collapse;font-size:12px}.table th,.table td{padding:9px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top}.table th{font-size:10px;color:var(--muted);text-transform:uppercase}
+.ticket{border:1px solid var(--line);border-radius:15px;padding:13px;margin-top:9px}.reply{background:#edf8f2;border:1px solid #cde9da;border-radius:11px;padding:9px;margin-top:8px;font-size:12px;color:#256347}
+.note{background:#fff7e5;border:1px solid #f1d499;color:#805b10;border-radius:14px;padding:11px 13px;font-size:12px;line-height:1.55}
+.login-screen{min-height:100vh;display:grid;place-items:center;padding:24px;background:linear-gradient(145deg,#f8f9fc,#fff5f1)}
+.login-card{width:min(100%,440px);background:#fff;border:1px solid var(--line);border-radius:26px;padding:24px;box-shadow:var(--shadow)}
+.auth-tabs{display:grid;grid-template-columns:1fr 1fr;gap:6px;background:#f4f6f9;padding:5px;border-radius:14px;margin:16px 0}
+.auth-tabs button{border:0;background:transparent;padding:10px;border-radius:10px;font-weight:850;color:var(--muted)}
+.auth-tabs button.active{background:#fff;color:var(--brand);box-shadow:0 3px 10px rgba(30,40,60,.07)}
+.google-btn{width:100%;border:1px solid var(--line);background:#fff;border-radius:13px;padding:12px 14px;font-weight:850;display:flex;align-items:center;justify-content:center;gap:9px}
+.auth-note{font-size:10px;color:var(--muted);line-height:1.5;margin-top:10px}
+.hero{background:linear-gradient(145deg,#fff,#fff3ef);border:1px solid #ffe0d7;border-radius:25px;padding:22px;box-shadow:var(--shadow)}
+.linkbox{margin-top:14px}.linkbox input{width:100%;padding:14px 15px;border:1px solid var(--line);border-radius:14px}
+.product{display:grid;grid-template-columns:120px 1fr;gap:14px;align-items:center}.productimg{width:120px;height:120px;border-radius:16px;background:#fff0eb;display:grid;place-items:center;font-size:34px}
+.howto{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}.step{border:1px solid var(--line);background:#fff;border-radius:16px;padding:12px}.ph{height:86px;border:1px dashed #efb9aa;border-radius:12px;background:#fff7f4;display:grid;place-items:center;color:#a36656;font-size:11px;text-align:center;padding:8px}.num{margin-top:10px;width:26px;height:26px;border-radius:8px;background:#fff0ec;color:var(--brand);display:grid;place-items:center;font-weight:900;font-size:11px}
+@media(max-width:760px){.grid,.grid3{grid-template-columns:1fr}.howto{grid-template-columns:1fr 1fr}.product{grid-template-columns:90px 1fr}.productimg{width:90px;height:90px}.topbar{padding:11px 12px}.page{padding:15px 12px}.stat .val{font-size:25px}}
+</style></head>
+<body>
+<div id="loginScreen" class="login-screen">
+  <div class="login-card">
+    <div class="logo">S</div>
+    <h1 style="margin-top:12px">Đăng nhập</h1>
+    <p>Đăng nhập để tạo link hoàn tiền và theo dõi cashback của bạn.</p>
+
+    <button class="google-btn" onclick="productionGoogleLogin()">
+      <span style="font-size:18px">G</span>
+      Tiếp tục với Google
+    </button>
+
+    <div style="display:flex;align-items:center;gap:10px;margin:16px 0">
+      <div style="height:1px;background:var(--line);flex:1"></div>
+      <span class="tiny">hoặc</span>
+      <div style="height:1px;background:var(--line);flex:1"></div>
+    </div>
+
+    <div class="auth-tabs">
+      <button id="loginTabBtn" class="active" onclick="showAuthTab('login')">Đăng nhập</button>
+      <button id="registerTabBtn" onclick="showAuthTab('register')">Tạo tài khoản</button>
+    </div>
+
+    <div id="loginForm">
+      <div class="field"><label>Tên đăng nhập</label><input id="loginIdentity" placeholder="Ví dụ: nguyenan"></div>
+      <div class="field" style="margin-top:9px"><label>Mật khẩu</label><input id="loginPassword" type="password" placeholder="Nhập mật khẩu"></div>
+      <button class="btn primary full" style="margin-top:12px" onclick="localLogin()">Đăng nhập</button>
+    </div>
+
+    <div id="registerForm" class="hidden">
+      <div class="field"><label>Tên hiển thị</label><input id="regName" placeholder="Ví dụ: Nguyễn An"></div>
+      <div class="field" style="margin-top:9px"><label>Tên đăng nhập</label><input id="regUsername" placeholder="Ví dụ: nguyenan"></div>
+      <div class="field" style="margin-top:9px"><label>Mật khẩu</label><input id="regPassword" type="password" placeholder="Tối thiểu 6 ký tự"></div>
+      <div class="field" style="margin-top:9px"><label>Nhập lại mật khẩu</label><input id="regPassword2" type="password" placeholder="Nhập lại mật khẩu"></div>
+      <button class="btn primary full" style="margin-top:12px" onclick="registerLocalAccount()">Tạo tài khoản</button>
+    </div>
+
+    <div class="auth-note">
+      Tài khoản thường đăng nhập bằng <b>Tên đăng nhập + Mật khẩu</b>.
+    </div>
+  </div>
+</div>
+
+<div id="appRoot" class="wrap hidden">
+<div class="topbar">
+  <div class="brand"><div class="logo">S</div><span>Shopee Cashback</span></div>
+  <div class="actions">
+    <button class="icon-btn" onclick="toggleNotif()">🔔<span id="notifBadge" class="badge hidden">0</span></button>
+    <button class="avatar-btn" onclick="toggleAccount()"><div class="avatar" id="avatar">U</div><span id="who">User</span><span class="tiny">▼</span></button>
+    <div id="notifPop" class="pop hidden"><div class="pop-title">Thông báo</div><div id="notifList"></div></div>
+    <div id="accountPop" class="pop hidden">
+      <div id="acctMenu">
+        <div class="pop-title">Tài khoản</div>
+        <button class="menu-btn" onclick="showProfileEdit()">✎ Chỉnh sửa thông tin</button>
+        <button class="menu-btn" onclick="showPage('support')">◉ Support / Báo vấn đề</button>
+        <button class="menu-btn danger" onclick="logoutUser()">↪ Đăng xuất</button>
+      </div>
+      <div id="acctEdit" class="hidden">
+        <div class="pop-title">Chỉnh sửa thông tin</div>
+        <div class="field"><label>Tên</label><input id="editName"></div>
+        
+        <button class="btn primary full" style="margin-top:9px" onclick="saveProfile()">Lưu</button>
+        <button class="btn ghost full" style="margin-top:7px" onclick="toggleAccount()">Đóng</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<section id="homePage" class="page">
+  <div class="hero">
+    <div class="eyebrow">Mua hàng • Nhận hoàn tiền</div>
+    <h1>Dán link sản phẩm Shopee và mua ngay.</h1>
+    <p>Bạn chỉ cần dán link sản phẩm muốn mua, chúng tôi sẽ tự động tạo lại link hoàn tiền cho bạn.</p>
+    <div class="linkbox"><input id="shopLink" placeholder="Dán link sản phẩm Shopee vào đây"></div>
+    <div id="cleanLinkBox" class="card hidden" style="margin-top:10px;padding:11px 12px;box-shadow:none">
+      <div class="tiny" style="font-weight:900;text-transform:uppercase;letter-spacing:.06em">Đã nhận diện sản phẩm</div>
+      <div id="cleanLinkValue" class="tiny" style="margin-top:5px;word-break:break-all"></div>
+      <div id="cleanLinkNote" class="tiny" style="margin-top:5px"></div>
+    </div>
+  </div>
+  <div id="productCard" class="card hidden" style="margin-top:14px">
+    <div class="product"><div class="productimg">🛍️</div><div><b id="previewName">Sản phẩm Shopee</b><p class="muted" style="margin:7px 0">Link đã được làm sạch trước khi tạo hoàn tiền.</p><button id="buyNowBtn" class="btn primary" onclick="buyNow()" disabled>Mua ngay & nhận hoàn tiền</button></div></div>
+  </div>
+
+  <div style="margin-top:15px"><div class="eyebrow">Cách nhận hoàn tiền</div><h2 style="margin-top:3px">Chỉ 4 bước đơn giản</h2></div>
+  <div class="howto">
+    <div class="step"><div class="ph">Ảnh bước 1<br>thay sau</div><div class="num">1</div><b>Copy link sản phẩm</b><div class="tiny" style="margin-top:5px">Sao chép link sản phẩm trên Shopee.</div></div>
+    <div class="step"><div class="ph">Ảnh bước 2<br>thay sau</div><div class="num">2</div><b>Dán link vào đây</b><div class="tiny" style="margin-top:5px">Web tự tạo link hoàn tiền.</div></div>
+    <div class="step"><div class="ph">Ảnh bước 3<br>thay sau</div><div class="num">3</div><b>Bấm mua ngay</b><div class="tiny" style="margin-top:5px">Quay lại Shopee từ link vừa tạo.</div></div>
+    <div class="step"><div class="ph">Ảnh bước 4<br>thay sau</div><div class="num">4</div><b>Mua hàng bình thường</b><div class="tiny" style="margin-top:5px">Đặt hàng trên Shopee như bình thường.</div></div>
+  </div>
+  <div class="note" style="margin-top:11px"><b>⚠ Lưu ý để được ghi nhận hoàn tiền</b><br><b>Không thêm sản phẩm muốn mua vào giỏ hàng trước khi tạo link hoàn tiền.</b> Sau khi bấm <b>“Mua ngay & nhận hoàn tiền”</b>, hãy mua sản phẩm hoặc thêm sản phẩm vào giỏ hàng từ chính link vừa mở trên Shopee. Thực hiện sai bước có thể không được ghi nhận cashback.</div>
+
+  <div class="grid" style="margin-top:15px">
+    <div class="card"><h2>Tổng quan của bạn</h2><div class="grid3">
+      <div class="stat wait"><div class="lab">Đang chờ</div><div class="val" id="homePending">0đ</div><div class="desc">Chờ Shopee ghi nhận & đối soát</div></div>
+      <div class="stat avail"><div class="lab">Khả dụng</div><div class="val" id="homeAvailable">0đ</div><div class="desc">Số dư hiện có • Có thể rút</div></div>
+      <div class="stat received"><div class="lab">Đã nhận</div><div class="val" id="homeReceived">0đ</div><div class="desc">Tổng cashback đơn thành công</div></div>
+    </div></div>
+    <div class="card"><h2>Hạng thành viên</h2>
+      <div class="row">
+        <div class="grow"><div class="muted">Hạng hiện tại</div><div id="tierName" style="font-size:24px;font-weight:950">Đồng</div></div>
+        <div style="text-align:right"><div class="muted">Tỷ lệ hoàn</div><div id="tierRate" style="font-size:24px;font-weight:950;color:var(--brand)">60%</div></div>
+      </div>
+      <div class="tier-progress-wrap">
+        <div class="tier-progress-head">
+          <div>
+            <div class="tiny" id="tierNextLabel">Tiến trình lên hạng Bạc</div>
+            <div class="tiny" id="tierRemaining" style="margin-top:3px">Còn 200.000đ để lên hạng</div>
+          </div>
+          <div class="tier-progress-pct" id="tierProgressPct">0%</div>
+        </div>
+        <div class="tier-progress-track"><div class="tier-progress-bar" id="tierProgressBar"></div></div>
+      </div>
+      <div class="tiny" style="line-height:1.8;margin-top:13px">
+        🥉 Đồng: từ <span id="thBronze">0đ</span> • <span id="rtBronze">60%</span><br>
+        🥈 Bạc: từ <span id="thSilver">200.000đ</span> • <span id="rtSilver">65%</span><br>
+        🥇 Vàng: từ <span id="thGold">500.000đ</span> • <span id="rtGold">70%</span><br>
+        💎 Bạch Kim: từ <span id="thPlat">1.000.000đ</span> • <span id="rtPlat">75%</span><br>
+        👑 Kim Cương: từ <span id="thDia">5.000.000đ</span> • <span id="rtDia">80%</span>
+      </div>
+    </div>
+  </div>
+
+  </section>
+
+<section id="ordersPage" class="page hidden"><h2>Đơn hàng của tôi</h2><div class="card" id="ordersList"></div></section>
+
+<section id="walletPage" class="page hidden">
+  <h2>Hoàn tiền & rút tiền</h2>
+  <div class="card"><div class="grid3">
+    <div class="stat avail"><div class="lab">Khả dụng</div><div class="val" id="walletAvailable">0đ</div><div class="desc">Số dư hiện có</div></div>
+    <div class="stat wait"><div class="lab">Đang chờ</div><div class="val" id="walletReserved">0đ</div><div class="desc">Chờ admin chuyển khoản</div></div>
+    <div class="stat received"><div class="lab">Đã rút</div><div class="val" id="walletPaid">0đ</div><div class="desc">Admin đã chuyển thành công</div></div>
+  </div></div>
+  <div class="card" style="margin-top:14px"><h2>Yêu cầu rút tiền</h2><div class="grid">
+    <div class="field">
+      <label>Số tiền</label>
+      <input id="wdAmount" type="number" placeholder="50.000 - 2.000.000" oninput="validateWithdrawAmount()">
+      <div id="wdAmountError" class="tiny" style="margin-top:6px;color:var(--bad)"></div>
+    </div>
+    <div class="field bank-picker">
+      <label>Ngân hàng</label>
+      <input id="wdBank" autocomplete="off" placeholder="Gõ MB, Vietcombank, Techcombank..." oninput="renderBankOptions()" onfocus="renderBankOptions()">
+      <div id="bankResults" class="bank-results hidden"></div>
+      <div id="bankSelected" class="bank-selected tiny"></div>
+    </div>
+    <div class="field"><label>Số tài khoản</label><input id="wdAccount" placeholder="Nhập số tài khoản"></div>
+    <div class="field"><label>Tên chủ tài khoản</label><input id="wdHolder" placeholder="Nhập tên chủ tài khoản"></div>
+  </div><button class="btn primary full" style="margin-top:11px" onclick="requestWithdraw()">Gửi yêu cầu rút tiền</button><div class="tiny" style="margin-top:8px">Tối thiểu 50.000đ • Tối đa 2.000.000đ/lần</div></div>
+  <div class="card" style="margin-top:14px"><h2>Lịch sử rút tiền</h2><div id="wdHistory"></div></div>
+</section>
+
+<section id="supportPage" class="page hidden">
+  <div class="row" style="justify-content:space-between"><div><div class="eyebrow">Hỗ trợ</div><h2 style="margin-top:3px">Báo vấn đề</h2></div><button class="btn ghost" onclick="showPage('home')">← Quay lại</button></div>
+  <div class="grid">
+    <div class="card"><h2>Gửi yêu cầu</h2><div class="field"><label>Loại vấn đề</label><select id="tkCat"><option>Cashback</option><option>Đơn hàng</option><option>Rút tiền</option><option>Tài khoản</option><option>Khác</option></select></div><div class="field" style="margin-top:8px"><label>Tiêu đề</label><input id="tkTitle"></div><div class="field" style="margin-top:8px"><label>Nội dung</label><textarea id="tkMsg"></textarea></div><button class="btn primary full" style="margin-top:10px" onclick="sendTicket()">Gửi hỗ trợ</button></div>
+    <div class="card"><h2>Yêu cầu của tôi</h2><div id="ticketList"></div></div>
+  </div>
+</section>
+
+<div class="nav"><button id="nHome" class="active" onclick="showPage('home')">⌂<br>Trang chủ</button><button id="nOrders" onclick="showPage('orders')">▣<br>Đơn hàng</button><button id="nWallet" onclick="showPage('wallet')">₫<br>Hoàn tiền</button></div>
+</div>
+
+<script>
+const KEY='shopeeCashbackProductionStateV1';
+const PRODUCTION_BACKEND={
+  enabled:false,
+  provider:'supabase',
+  note:'Set enabled=true and connect Supabase Auth/Database before public launch.'
+};
+function requireProductionBackend(){
+  if(!PRODUCTION_BACKEND.enabled){
+    alert('Production backend chưa được cấu hình. Hãy kết nối Supabase trước khi public website.');
+    return false;
+  }
+  return true;
+}
+function productionGoogleLogin(){
+  if(!requireProductionBackend())return;
+  // TODO: Supabase OAuth signInWithOAuth({provider:'google'})
+}
+
+const $=s=>document.querySelector(s);
+const money=n=>new Intl.NumberFormat('vi-VN').format(Number(n||0))+'đ';
+const esc=s=>String(s??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m]));
+function initialState(){
+ return {
+   user:{id:'U001',name:'Nguyễn An',email:'user@example.com'},
+   accounts:[],
+   currentUserId:null,
+   productionMode:true,
+   savedBankInfo:{},
+   settings:{minWithdraw:50000,maxWithdraw:2000000,tierRates:{bronze:60,silver:65,gold:70,platinum:75,diamond:80},tierThresholds:{bronze:0,silver:200000,gold:500000,platinum:1000000,diamond:5000000}},
+   clicks:[],
+   orders:[
+     {id:'OD001',userId:'U001',product:'Tai nghe Bluetooth',orderValue:320000,commission:24000,cashback:16800,orderStatus:'Hoàn thành',commissionStatus:'Đã xác nhận',createdAt:new Date(Date.now()-86400000*6).toISOString()},
+     {id:'OD002',userId:'U001',product:'Ốp điện thoại',orderValue:120000,commission:8000,cashback:5600,orderStatus:'Đã nhận hàng',commissionStatus:'Đang chờ',createdAt:new Date(Date.now()-86400000*2).toISOString()}
+   ],
+   withdrawals:[],
+   notifications:[
+     {id:'N1',userId:'U001',title:'Chào mừng bạn',message:'Dán link sản phẩm Shopee để bắt đầu nhận hoàn tiền.',read:false,createdAt:new Date().toISOString()}
+   ],
+   tickets:[],
+   dev:{lastUpdate:new Date().toISOString()}
+ };
+}
+function load(){
+ let s;try{s=JSON.parse(localStorage.getItem(KEY)||'null')}catch(e){}
+ if(!s)s=initialState();
+ if(!s.tickets)s.tickets=[]; if(!s.notifications)s.notifications=[]; if(!s.withdrawals)s.withdrawals=[]; if(!s.orders)s.orders=[]; if(!s.clicks)s.clicks=[]; if(!s.settings.tierThresholds)s.settings.tierThresholds={bronze:0,silver:200000,gold:500000,platinum:1000000,diamond:5000000}; if(!s.accounts)s.accounts=[{id:'U001',name:s.user?.name||'Nguyễn An',email:s.user?.email||'user@example.com',username:'nguyenan',password:'123456',authType:'local',status:'active',createdAt:new Date().toISOString()}]; if(s.currentUserId===undefined)s.currentUserId=null; if(!s.deletedUserIds)s.deletedUserIds=[]; if(!s.savedBankInfo)s.savedBankInfo={};
+ return s;
+}
+let state=load();
+function save(){state.dev={...(state.dev||{}),lastUpdate:new Date().toISOString()};localStorage.setItem(KEY,JSON.stringify(state))}
+
+function statusClass(s){s=(s||'').toLowerCase();if(s.includes('xác nhận')||s.includes('hoàn thành')||s.includes('đã trả')||s.includes('đã phản hồi'))return's-ok';if(s.includes('hủy')||s.includes('từ chối')||s.includes('không'))return's-bad';if(s.includes('chờ'))return's-pending';return's-info'}
+function tier(total){
+  const r=state.settings.tierRates,t=state.settings.tierThresholds;
+  if(total>=t.diamond)return['Kim Cương',r.diamond];
+  if(total>=t.platinum)return['Bạch Kim',r.platinum];
+  if(total>=t.gold)return['Vàng',r.gold];
+  if(total>=t.silver)return['Bạc',r.silver];
+  return['Đồng',r.bronze];
+}
+
+const FALLBACK_BANKS=[{"shortName": "ABBANK", "name": "Ngân hàng TMCP An Bình", "code": "ABB", "logo": "https://api.vietqr.io/img/ABB.png"}, {"shortName": "ACB", "name": "Ngân hàng TMCP Á Châu", "code": "ACB", "logo": "https://api.vietqr.io/img/ACB.png"}, {"shortName": "Bac A Bank", "name": "Ngân hàng TMCP Bắc Á", "code": "BAB", "logo": "https://api.vietqr.io/img/BAB.png"}, {"shortName": "BIDV", "name": "Ngân hàng TMCP Đầu tư và Phát triển Việt Nam", "code": "BIDV", "logo": "https://api.vietqr.io/img/BIDV.png"}, {"shortName": "BVBank", "name": "Ngân hàng TMCP Bản Việt", "code": "BVB", "logo": "https://api.vietqr.io/img/BVB.png"}, {"shortName": "CBBank", "name": "Ngân hàng Xây dựng", "code": "CBB", "logo": "https://api.vietqr.io/img/CBB.png"}, {"shortName": "CIMB", "name": "CIMB Việt Nam", "code": "CIMB", "logo": "https://api.vietqr.io/img/CIMB.png"}, {"shortName": "Co-opBank", "name": "Ngân hàng Hợp tác xã Việt Nam", "code": "COOPBANK", "logo": "https://api.vietqr.io/img/COOPBANK.png"}, {"shortName": "Eximbank", "name": "Ngân hàng TMCP Xuất Nhập khẩu Việt Nam", "code": "EIB", "logo": "https://api.vietqr.io/img/EIB.png"}, {"shortName": "GPBank", "name": "Ngân hàng GPBank", "code": "GPB", "logo": "https://api.vietqr.io/img/GPB.png"}, {"shortName": "HDBank", "name": "Ngân hàng TMCP Phát triển TP.HCM", "code": "HDB", "logo": "https://api.vietqr.io/img/HDB.png"}, {"shortName": "Hong Leong Bank", "name": "Hong Leong Bank Việt Nam", "code": "HLBVN", "logo": "https://api.vietqr.io/img/HLBVN.png"}, {"shortName": "HSBC", "name": "HSBC Việt Nam", "code": "HSBC", "logo": "https://api.vietqr.io/img/HSBC.png"}, {"shortName": "KienlongBank", "name": "Ngân hàng TMCP Kiên Long", "code": "KLB", "logo": "https://api.vietqr.io/img/KLB.png"}, {"shortName": "LPBank", "name": "Ngân hàng TMCP Lộc Phát Việt Nam", "code": "LPB", "logo": "https://api.vietqr.io/img/LPB.png"}, {"shortName": "MB Bank", "name": "Ngân hàng TMCP Quân đội", "code": "MB", "logo": "https://api.vietqr.io/img/MB.png"}, {"shortName": "MSB", "name": "Ngân hàng TMCP Hàng Hải Việt Nam", "code": "MSB", "logo": "https://api.vietqr.io/img/MSB.png"}, {"shortName": "Nam A Bank", "name": "Ngân hàng TMCP Nam Á", "code": "NAB", "logo": "https://api.vietqr.io/img/NAB.png"}, {"shortName": "NCB", "name": "Ngân hàng TMCP Quốc Dân", "code": "NCB", "logo": "https://api.vietqr.io/img/NCB.png"}, {"shortName": "OCB", "name": "Ngân hàng TMCP Phương Đông", "code": "OCB", "logo": "https://api.vietqr.io/img/OCB.png"}, {"shortName": "PGBank", "name": "Ngân hàng TMCP Thịnh vượng và Phát triển", "code": "PGB", "logo": "https://api.vietqr.io/img/PGB.png"}, {"shortName": "Public Bank Vietnam", "name": "Public Bank Việt Nam", "code": "PBVN", "logo": "https://api.vietqr.io/img/PBVN.png"}, {"shortName": "PVcomBank", "name": "Ngân hàng TMCP Đại Chúng Việt Nam", "code": "PVCB", "logo": "https://api.vietqr.io/img/PVCB.png"}, {"shortName": "Sacombank", "name": "Ngân hàng TMCP Sài Gòn Thương Tín", "code": "STB", "logo": "https://api.vietqr.io/img/STB.png"}, {"shortName": "Saigonbank", "name": "Ngân hàng TMCP Sài Gòn Công Thương", "code": "SGB", "logo": "https://api.vietqr.io/img/SGB.png"}, {"shortName": "SeABank", "name": "Ngân hàng TMCP Đông Nam Á", "code": "SEAB", "logo": "https://api.vietqr.io/img/SEAB.png"}, {"shortName": "SHB", "name": "Ngân hàng TMCP Sài Gòn - Hà Nội", "code": "SHB", "logo": "https://api.vietqr.io/img/SHB.png"}, {"shortName": "Shinhan Bank", "name": "Shinhan Bank Việt Nam", "code": "SHBVN", "logo": "https://api.vietqr.io/img/SHBVN.png"}, {"shortName": "Techcombank", "name": "Ngân hàng TMCP Kỹ thương Việt Nam", "code": "TCB", "logo": "https://api.vietqr.io/img/TCB.png"}, {"shortName": "TPBank", "name": "Ngân hàng TMCP Tiên Phong", "code": "TPB", "logo": "https://api.vietqr.io/img/TPB.png"}, {"shortName": "UOB", "name": "UOB Việt Nam", "code": "UOB", "logo": "https://api.vietqr.io/img/UOB.png"}, {"shortName": "VIB", "name": "Ngân hàng TMCP Quốc tế Việt Nam", "code": "VIB", "logo": "https://api.vietqr.io/img/VIB.png"}, {"shortName": "VietABank", "name": "Ngân hàng TMCP Việt Á", "code": "VAB", "logo": "https://api.vietqr.io/img/VAB.png"}, {"shortName": "Vietbank", "name": "Ngân hàng TMCP Việt Nam Thương Tín", "code": "VBB", "logo": "https://api.vietqr.io/img/VBB.png"}, {"shortName": "Vietcombank", "name": "Ngân hàng TMCP Ngoại thương Việt Nam", "code": "VCB", "logo": "https://api.vietqr.io/img/VCB.png"}, {"shortName": "VietinBank", "name": "Ngân hàng TMCP Công thương Việt Nam", "code": "ICB", "logo": "https://api.vietqr.io/img/ICB.png"}, {"shortName": "VPBank", "name": "Ngân hàng TMCP Việt Nam Thịnh Vượng", "code": "VPB", "logo": "https://api.vietqr.io/img/VPB.png"}, {"shortName": "VRB", "name": "Ngân hàng Liên doanh Việt - Nga", "code": "VRB", "logo": "https://api.vietqr.io/img/VRB.png"}, {"shortName": "Woori Bank", "name": "Woori Bank Việt Nam", "code": "WVN", "logo": "https://api.vietqr.io/img/WVN.png"}, {"shortName": "Agribank", "name": "Ngân hàng Nông nghiệp và Phát triển Nông thôn Việt Nam", "code": "VBA", "logo": "https://api.vietqr.io/img/VBA.png"}];
+let BANKS=FALLBACK_BANKS.slice();
+
+async function loadBanks(){
+  try{
+    const r=await fetch('https://api.vietqr.io/v2/banks',{cache:'no-store'});
+    const j=await r.json();
+    if(Array.isArray(j.data)&&j.data.length){
+      BANKS=j.data.map(b=>({
+        shortName:b.shortName||b.short_name||b.code||b.name,
+        name:b.name||b.shortName||b.code,
+        code:b.code||b.shortName||'',
+        bin:b.bin||'',
+        logo:b.logo||''
+      })).sort((x,y)=>(x.shortName||'').localeCompare(y.shortName||'','vi'));
+    }
+  }catch(e){}
+  if(typeof renderBankOptions==='function')renderBankOptions();
+}
+function bankByName(v){
+  const q=(v||'').trim().toLowerCase();
+  return BANKS.find(b=>[b.shortName,b.name,b.code,b.bin].filter(Boolean).some(x=>String(x).toLowerCase()===q))
+    || BANKS.find(b=>(b.shortName||'').toLowerCase().includes(q)||(b.name||'').toLowerCase().includes(q));
+}
+function bankLogoHtml(bank,size=34){
+  if(!bank)return '<div style="width:'+size+'px;height:'+size+'px;border-radius:9px;background:#f0f2f6;display:grid;place-items:center;font-size:10px;font-weight:900">BANK</div>';
+  if(bank.logo)return '<img src="'+esc(bank.logo)+'" alt="'+esc(bank.shortName||bank.name)+'" style="width:'+size+'px;height:'+size+'px;object-fit:contain;border-radius:8px;background:#fff;border:1px solid var(--line);padding:3px" onerror="this.style.display=\'none\'">';
+  return '<div style="width:'+size+'px;height:'+size+'px;border-radius:9px;background:#f0f2f6;display:grid;place-items:center;font-size:9px;font-weight:900">'+esc((bank.shortName||bank.code||'BANK').slice(0,5))+'</div>';
+}
+
+window.addEventListener('storage',e=>{
+  if(e.key===KEY){
+    state=load();
+    if(typeof showAuthState==='function') showAuthState();
+    else if(typeof render==='function') render();
+  }
+});
+
+
+function syncActiveUser(){
+  state=load();
+  if(!state.currentUserId) return false;
+  const acct=state.accounts.find(x=>x.id===state.currentUserId);
+  const wasDeleted=(state.deletedUserIds||[]).includes(state.currentUserId);
+  if(!acct || wasDeleted || acct.status!=='active'){
+    state.currentUserId=null;
+    save();
+    return false;
+  }
+  state.user={id:acct.id,name:acct.name,email:acct.email};
+  return true;
+}
+function showAuthState(){
+  const logged=syncActiveUser();
+  $('#loginScreen').classList.toggle('hidden',logged);
+  $('#appRoot').classList.toggle('hidden',!logged);
+  if(logged) render();
+}
+
+function showAuthTab(tab){
+  const isLogin=tab==='login';
+  $('#loginForm').classList.toggle('hidden',!isLogin);
+  $('#registerForm').classList.toggle('hidden',isLogin);
+  $('#loginTabBtn').classList.toggle('active',isLogin);
+  $('#registerTabBtn').classList.toggle('active',!isLogin);
+}
+function registerLocalAccount(){
+  if(!requireProductionBackend())return;
+  const name=$('#regName').value.trim();
+  const username=$('#regUsername').value.trim();
+  const password=$('#regPassword').value;
+  const password2=$('#regPassword2').value;
+
+  if(!name||!username||!password||!password2){
+    alert('Vui lòng nhập đầy đủ thông tin.');
+    return;
+  }
+  if(password.length<6){
+    alert('Mật khẩu phải có ít nhất 6 ký tự.');
+    return;
+  }
+  if(password!==password2){
+    alert('Hai mật khẩu không trùng nhau.');
+    return;
+  }
+  if(state.accounts.some(x=>(x.username||'').toLowerCase()===username.toLowerCase())){
+    alert('Tên đăng nhập đã tồn tại.');
+    return;
+  }
+
+  const id='U'+String(Date.now()).slice(-6);
+  state.accounts.push({
+    id,name,email:'',username,password,
+    authType:'local',status:'active',
+    createdAt:new Date().toISOString()
+  });
+  state.currentUserId=id;
+  state.user={id,name,email:''};
+  state.notifications.push({
+    id:'N'+Date.now(),
+    userId:id,
+    title:'Tạo tài khoản thành công',
+    message:'Chào mừng '+name+' đến với Shopee Cashback.',
+    read:false,
+    createdAt:new Date().toISOString()
+  });
+  save();
+  showAuthState();
+}
+function localLogin(){
+  if(!requireProductionBackend())return;
+  state=load();
+  const username=$('#loginIdentity').value.trim().toLowerCase();
+  const password=$('#loginPassword').value;
+  const acct=state.accounts.find(x=>x.authType==='local' && (x.username||'').toLowerCase()===username);
+  if(!acct) return alert('Tên đăng nhập không tồn tại.');
+  if(acct.status!=='active') return alert('Tài khoản đang bị khóa. Vui lòng liên hệ admin.');
+  if(acct.password!==password) return alert('Mật khẩu không đúng.');
+  state.currentUserId=acct.id;
+  state.user={id:acct.id,name:acct.name,email:acct.email};
+  save();
+  showAuthState();
+}
+function devGoogleLogin(){
+  const acct=state.accounts.find(x=>x.authType==='google' && x.status==='active');
+  if(!acct) return alert('Chưa có tài khoản Google khả dụng.');
+  state.currentUserId=acct.id;
+  state.user={id:acct.id,name:acct.name,email:acct.email};
+  save();
+  showAuthState();
+}
+function logoutUser(){
+  state.currentUserId=null;
+  save();
+  closePops();
+  $('#appRoot').classList.add('hidden');
+  $('#loginScreen').classList.remove('hidden');
+}
+
+function showPage(p){['home','orders','wallet','support'].forEach(x=>$('#'+x+'Page').classList.toggle('hidden',x!==p));['home','orders','wallet'].forEach(x=>{const b=$('#n'+x[0].toUpperCase()+x.slice(1));if(b)b.classList.toggle('active',x===p)});closePops();render()}
+function closePops(){$('#notifPop').classList.add('hidden');$('#accountPop').classList.add('hidden')}
+function toggleNotif(){const p=$('#notifPop');const open=p.classList.contains('hidden');closePops();if(open){p.classList.remove('hidden');state.notifications.filter(n=>n.userId===state.user.id).forEach(n=>n.read=true);save();renderNotif()}}
+function toggleAccount(){const p=$('#accountPop');const open=p.classList.contains('hidden');closePops();if(open){p.classList.remove('hidden');$('#acctMenu').classList.remove('hidden');$('#acctEdit').classList.add('hidden')}}
+function showProfileEdit(){$('#acctMenu').classList.add('hidden');$('#acctEdit').classList.remove('hidden');$('#editName').value=state.user.name}
+function saveProfile(){
+  state.user.name=$('#editName').value.trim()||state.user.name;
+  const acct=state.accounts.find(x=>x.id===state.user.id);
+  if(acct)acct.name=state.user.name;
+  save();closePops();render();
+}
+function renderNotif(){const arr=state.notifications.filter(n=>n.userId===state.user.id).slice().reverse();const unread=arr.filter(n=>!n.read).length;$('#notifBadge').textContent=unread;$('#notifBadge').classList.toggle('hidden',unread===0);$('#notifList').innerHTML=arr.length?arr.map(n=>`<div class="pop-item"><b>${esc(n.title)}</b><div class="muted" style="margin-top:3px">${esc(n.message)}</div><div class="tiny" style="margin-top:4px">${new Date(n.createdAt).toLocaleString('vi-VN')}</div></div>`).join(''):'<div class="pop-item muted">Chưa có thông báo.</div>'}
+function balances(){const o=state.orders.filter(x=>x.userId===state.user.id);const pending=o.filter(x=>statusClass(x.commissionStatus)==='s-pending').reduce((a,x)=>a+Number(x.cashback||0),0);const confirmed=o.filter(x=>statusClass(x.commissionStatus)==='s-ok').reduce((a,x)=>a+Number(x.cashback||0),0);const w=state.withdrawals.filter(x=>x.userId===state.user.id);const reserved=w.filter(x=>x.status==='Đang chờ').reduce((a,x)=>a+Number(x.amount||0),0);const paid=w.filter(x=>x.status==='Đã trả').reduce((a,x)=>a+Number(x.amount||0),0);return{pending,confirmed,reserved,paid,available:Math.max(0,confirmed-reserved-paid)}}
+function tierProgress(total){
+  const t=state.settings.tierThresholds;
+  if(total>=t.diamond) return {nextName:null,min:t.diamond,next:t.diamond,pct:100,remaining:0};
+  let min=t.bronze,next=t.silver,nextName='Bạc';
+  if(total>=t.platinum){min=t.platinum;next=t.diamond;nextName='Kim Cương'}
+  else if(total>=t.gold){min=t.gold;next=t.platinum;nextName='Bạch Kim'}
+  else if(total>=t.silver){min=t.silver;next=t.gold;nextName='Vàng'}
+  const span=Math.max(1,next-min);
+  const pct=Math.max(0,Math.min(100,Math.round(((total-min)/span)*100)));
+  return {nextName,min,next,pct,remaining:Math.max(0,next-total)};
+}
+function render(){const b=balances();$('#who').textContent=state.user.name;$('#avatar').textContent=(state.user.name||'U')[0].toUpperCase();$('#homePending').textContent=money(b.pending);$('#homeAvailable').textContent=money(b.available);$('#homeReceived').textContent=money(b.confirmed);$('#walletAvailable').textContent=money(b.available);$('#walletReserved').textContent=money(b.reserved);$('#walletPaid').textContent=money(b.paid);const t=tier(b.confirmed);
+  $('#tierName').textContent=t[0];
+  $('#tierRate').textContent=t[1]+'%';
+  $('#thBronze').textContent=money(state.settings.tierThresholds.bronze);
+  $('#thSilver').textContent=money(state.settings.tierThresholds.silver);
+  $('#thGold').textContent=money(state.settings.tierThresholds.gold);
+  $('#thPlat').textContent=money(state.settings.tierThresholds.platinum);
+  $('#thDia').textContent=money(state.settings.tierThresholds.diamond);
+  $('#rtBronze').textContent=state.settings.tierRates.bronze+'%';
+  $('#rtSilver').textContent=state.settings.tierRates.silver+'%';
+  $('#rtGold').textContent=state.settings.tierRates.gold+'%';
+  $('#rtPlat').textContent=state.settings.tierRates.platinum+'%';
+  $('#rtDia').textContent=state.settings.tierRates.diamond+'%';
+  const tp=tierProgress(b.confirmed);
+  $('#tierProgressPct').textContent=tp.pct+'%';
+  $('#tierProgressBar').style.width=tp.pct+'%';
+  if(tp.nextName){
+    $('#tierNextLabel').textContent='Tiến trình lên hạng '+tp.nextName;
+    $('#tierRemaining').textContent='Còn '+money(tp.remaining)+' để lên hạng';
+  }else{
+    $('#tierNextLabel').textContent='Bạn đã đạt hạng cao nhất';
+    $('#tierRemaining').textContent='Tiếp tục mua sắm để duy trì quyền lợi Kim Cương';
+  }
+  renderOrders();renderWithdrawals();loadSavedBankInfo();validateWithdrawAmount();renderTickets();renderNotif()}
+function renderOrders(){const arr=state.orders.filter(o=>o.userId===state.user.id).slice().sort((a,b)=>new Date(b.createdAt||0)-new Date(a.createdAt||0));$('#ordersList').innerHTML=arr.length?arr.map(o=>`<div class="order"><div class="thumb">🛍️</div><div><b>${esc(o.product)}</b><div class="muted">Giá trị đơn: ${money(o.orderValue)}</div><div style="margin-top:5px"><span class="status ${statusClass(o.orderStatus)}">${esc(o.orderStatus)}</span> <span class="status ${statusClass(o.commissionStatus)}">${esc(o.commissionStatus)}</span></div>${statusClass(o.commissionStatus)==='s-pending'?'<div class="tiny" style="margin-top:7px;color:#8a6618">Cashback sẽ được rà soát và cập nhật trong khoảng 3–5 ngày kể từ khi đơn được xác nhận đã nhận hàng.</div>':''}</div><div class="amount">
+  <div class="tiny" style="margin-bottom:4px">Bạn nhận được</div>
+  <div style="color:${statusClass(o.commissionStatus)==='s-bad'?'var(--bad)':'var(--ok)'}">
+    ${statusClass(o.commissionStatus)==='s-bad'?'0đ':'+'+money(o.cashback)}
+  </div>
+</div></div>`).join(''):'<p class="muted">Chưa có đơn.</p>'}
+
+
+function renderBankOptions(){
+  const box=$('#bankResults');
+  if(!box)return;
+  const q=($('#wdBank').value||'').trim().toLowerCase();
+  const list=BANKS.filter(b=>!q ||
+    (b.shortName||'').toLowerCase().includes(q) ||
+    (b.name||'').toLowerCase().includes(q) ||
+    (b.code||'').toLowerCase().includes(q)
+  ).slice(0,18);
+
+  if(document.activeElement!==$('#wdBank')){
+    box.classList.add('hidden');
+  }else{
+    box.classList.remove('hidden');
+  }
+
+  box.innerHTML=list.length?list.map((b,i)=>`
+    <button type="button" class="bank-option" onclick="selectBankByIndex(${BANKS.indexOf(b)})">
+      ${bankLogoHtml(b,36)}
+      <span><b>${esc(b.shortName||b.code)}</b><br><span class="tiny">${esc(b.name||'')}</span></span>
+    </button>`).join(''):'<div class="muted" style="padding:10px">Không tìm thấy ngân hàng.</div>';
+
+  renderSelectedBank();
+}
+function selectBankByIndex(i){
+  const b=BANKS[i];
+  if(!b)return;
+  $('#wdBank').value=b.shortName||b.code||b.name;
+  $('#bankResults').classList.add('hidden');
+  renderSelectedBank();
+}
+function renderSelectedBank(){
+  const el=$('#bankSelected');
+  if(!el)return;
+  const b=bankByName($('#wdBank').value);
+  el.innerHTML=b?bankLogoHtml(b,28)+'<span><b>'+esc(b.shortName||b.code)+'</b> · '+esc(b.name||'')+'</span>':'';
+}
+
+function loadSavedBankInfo(){
+  const info=(state.savedBankInfo||{})[state.user.id]||{};
+  if(document.activeElement!==$('#wdBank')) $('#wdBank').value=info.bank||''; renderSelectedBank();
+  if(document.activeElement!==$('#wdAccount')) $('#wdAccount').value=info.account||'';
+  if(document.activeElement!==$('#wdHolder')) $('#wdHolder').value=info.holder||'';
+}
+
+function renderWithdrawals(){const arr=state.withdrawals.filter(w=>w.userId===state.user.id).slice().reverse();$('#wdHistory').innerHTML=arr.length?arr.map(w=>`<div class="order"><div class="thumb">₫</div><div><b>${money(w.amount)}</b><div class="muted">${esc(w.bank)} • ${esc(w.account)}</div></div><div><span class="status ${statusClass(w.status)}">${esc(w.status)}</span>${w.status==='Từ chối'&&w.rejectReason?`<div class="tiny" style="margin-top:5px;color:var(--bad);max-width:220px">Lý do: ${esc(w.rejectReason)}</div>`:''}</div></div>`).join(''):'<p class="muted">Chưa có yêu cầu rút.</p>'}
+
+function validateWithdrawAmount(){
+  const el=$('#wdAmountError');
+  if(!el)return true;
+
+  const amt=Number($('#wdAmount').value||0);
+  const b=balances();
+
+  if(!amt){
+    el.textContent='';
+    return true;
+  }
+
+  if(amt>b.available){
+    el.textContent='Số tiền rút vượt quá số dư khả dụng. Vui lòng nhập số tiền thấp hơn hoặc bằng '+money(b.available)+'.';
+    return false;
+  }
+
+  if(amt<state.settings.minWithdraw){
+    el.textContent='Số tiền rút tối thiểu là '+money(state.settings.minWithdraw)+'.';
+    return false;
+  }
+
+  if(amt>state.settings.maxWithdraw){
+    el.textContent='Mỗi lần chỉ có thể rút tối đa '+money(state.settings.maxWithdraw)+'.';
+    return false;
+  }
+
+  el.textContent='';
+  return true;
+}
+
+function requestWithdraw(){
+  const b=balances(),amt=Number($('#wdAmount').value||0);
+  const bank=$('#wdBank').value.trim();
+  const account=$('#wdAccount').value.trim();
+  const holder=$('#wdHolder').value.trim();
+
+  if(amt<state.settings.minWithdraw){validateWithdrawAmount();return alert('Số tiền rút tối thiểu là '+money(state.settings.minWithdraw)+'.');}
+  if(amt>state.settings.maxWithdraw){validateWithdrawAmount();return alert('Mỗi lần chỉ có thể rút tối đa '+money(state.settings.maxWithdraw)+'.');}
+  if(amt>b.available){validateWithdrawAmount();return alert('Số tiền rút vượt quá số dư khả dụng. Vui lòng nhập số tiền thấp hơn hoặc bằng '+money(b.available)+'.');}
+  if(!bank||!account||!holder)return alert('Vui lòng nhập đầy đủ thông tin tài khoản nhận tiền.');
+
+  if(!state.savedBankInfo)state.savedBankInfo={};
+  state.savedBankInfo[state.user.id]={bank,account,holder};
+
+  state.withdrawals.push({
+    id:'W'+Date.now(),
+    userId:state.user.id,
+    amount:amt,
+    bank,
+    account,
+    holder,
+    status:'Đang chờ',
+    createdAt:new Date().toISOString()
+  });
+
+  save();
+  render();
+  $('#wdAmount').value='';
+  alert('Đã gửi yêu cầu rút. Thông tin tài khoản đã được lưu cho lần sau.');
+}
+function renderTickets(){const a=state.tickets.filter(t=>t.userId===state.user.id).slice().reverse();$('#ticketList').innerHTML=a.length?a.map(t=>`<div class="ticket"><div class="row" style="justify-content:space-between"><b>${esc(t.title)}</b><span class="status ${statusClass(t.status)}">${esc(t.status)}</span></div><div class="tiny">${esc(t.category)} • ${new Date(t.createdAt).toLocaleString('vi-VN')}</div><div class="muted" style="margin-top:7px">${esc(t.message)}</div>${t.reply?`<div class="reply"><b>Admin:</b><br>${esc(t.reply)}</div>`:''}</div>`).join(''):'<p class="muted">Chưa có ticket.</p>'}
+function sendTicket(){const title=$('#tkTitle').value.trim(),message=$('#tkMsg').value.trim();if(!title||!message)return alert('Nhập tiêu đề và nội dung.');state.tickets.push({id:'T'+Date.now(),userId:state.user.id,userName:state.user.name,userEmail:state.user.email,category:$('#tkCat').value,title,message,status:'Đang chờ',reply:'',createdAt:new Date().toISOString()});save();$('#tkTitle').value='';$('#tkMsg').value='';render();alert('Đã gửi support ticket.')}
+
+const AFFILIATE_ID='17388700642';
+let resolvedShopeeLink=null;
+let resolveTimer=null;
+
+function cleanShopeeProductUrl(raw){
+  let input=(raw||'').trim();
+  if(!input)return {ok:false,reason:'empty'};
+
+  if(!/^https?:\/\//i.test(input)){
+    input='https://'+input.replace(/^\/+/,'');
+  }
+
+  let url;
+  try{url=new URL(input)}
+  catch(e){return {ok:false,reason:'invalid'}}
+
+  const host=url.hostname.toLowerCase().replace(/^www\./,'');
+
+  if(host!=='shopee.vn' && host!=='s.shopee.vn'){
+    return {ok:false,reason:'not_shopee'};
+  }
+
+  if(host==='s.shopee.vn'){
+    return {
+      ok:true,
+      short:true,
+      cleanUrl:url.origin+url.pathname
+    };
+  }
+
+  const path=decodeURIComponent(url.pathname);
+  let shopId='',itemId='',m;
+
+  m=path.match(/\/product\/(\d+)\/(\d+)/i);
+  if(m){shopId=m[1];itemId=m[2]}
+
+  if(!shopId){
+    m=path.match(/\/[^/]+\/(\d+)\/(\d+)(?:\/|$)/i);
+    if(m){shopId=m[1];itemId=m[2]}
+  }
+
+  if(!shopId){
+    m=path.match(/-i\.(\d+)\.(\d+)/i);
+    if(m){shopId=m[1];itemId=m[2]}
+  }
+
+  if(!shopId){
+    const nums=path.split('/').filter(Boolean).filter(x=>/^\d+$/.test(x));
+    if(nums.length>=2){
+      shopId=nums[nums.length-2];
+      itemId=nums[nums.length-1];
+    }
+  }
+
+  if(!shopId||!itemId){
+    return {
+      ok:true,
+      partial:true,
+      cleanUrl:'https://shopee.vn'+url.pathname.replace(/\/+$/,'')
+    };
+  }
+
+  return {
+    ok:true,
+    short:false,
+    partial:false,
+    shopId,
+    itemId,
+    cleanUrl:'https://shopee.vn/product/'+shopId+'/'+itemId
+  };
+}
+
+async function resolveShopeeUrl(inputUrl){
+  const r=await fetch(
+    '/api/resolve-shopee?url='+encodeURIComponent(inputUrl),
+    {headers:{accept:'application/json'}}
+  );
+
+  let data=null;
+  try{data=await r.json()}catch(e){}
+
+  if(!r.ok||!data||!data.ok||!data.cleanUrl){
+    throw new Error((data&&data.error)||'resolve_failed');
+  }
+
+  return data;
+}
+
+async function updateShopeePreview(){
+  const raw=$('#shopLink').value.trim();
+  const productCard=$('#productCard');
+  const cleanBox=$('#cleanLinkBox');
+  const value=$('#cleanLinkValue');
+  const note=$('#cleanLinkNote');
+  const buyBtn=$('#buyNowBtn');
+
+  clearTimeout(resolveTimer);
+  resolvedShopeeLink=null;
+
+  if(!raw){
+    cleanBox.classList.add('hidden');
+    productCard.classList.add('hidden');
+    if(buyBtn)buyBtn.disabled=true;
+    return;
+  }
+
+  const parsed=cleanShopeeProductUrl(raw);
+
+  if(!parsed.ok){
+    cleanBox.classList.remove('hidden');
+    value.textContent='Link không hợp lệ';
+    note.textContent='Vui lòng dán link sản phẩm Shopee.';
+    productCard.classList.add('hidden');
+    if(buyBtn)buyBtn.disabled=true;
+    return;
+  }
+
+  cleanBox.classList.remove('hidden');
+  productCard.classList.remove('hidden');
+  value.textContent=parsed.cleanUrl;
+  note.textContent='Đang kiểm tra link Shopee...';
+  if(buyBtn)buyBtn.disabled=true;
+
+  resolveTimer=setTimeout(async()=>{
+    try{
+      const data=await resolveShopeeUrl(parsed.cleanUrl);
+      resolvedShopeeLink=data;
+
+      value.textContent=data.cleanUrl;
+      note.textContent='Đã loại bỏ tracking cũ và sẵn sàng tạo link hoàn tiền.';
+      if(buyBtn)buyBtn.disabled=false;
+    }catch(e){
+      if(parsed.short){
+        value.textContent=parsed.cleanUrl;
+        note.textContent='Không thể xử lý link rút gọn lúc này. Vui lòng thử lại.';
+        if(buyBtn)buyBtn.disabled=true;
+      }else{
+        resolvedShopeeLink=parsed;
+        value.textContent=parsed.cleanUrl;
+        note.textContent='Đã làm sạch link sản phẩm.';
+        if(buyBtn)buyBtn.disabled=false;
+      }
+    }
+  },250);
+}
+
+function getProductionSubId(){
+  const raw=(state&&state.user&&state.user.id)?String(state.user.id):'guest';
+  return raw.replace(/[^A-Za-z0-9_-]/g,'').slice(0,60)||'guest';
+}
+
+async function buyNow(){
+  const raw=$('#shopLink').value.trim();
+  if(!raw)return;
+
+  // Open immediately from the user gesture so mobile browsers do not block it.
+  const newTab=window.open('about:blank','_blank');
+
+  try{
+    let result=resolvedShopeeLink||cleanShopeeProductUrl(raw);
+
+    if(!result.ok){
+      throw new Error('invalid_link');
+    }
+
+    if(result.short||!result.shopId||!result.itemId){
+      result=await resolveShopeeUrl(result.cleanUrl);
+      resolvedShopeeLink=result;
+    }
+
+    const cleanUrl=result.cleanUrl;
+    const subId=getProductionSubId();
+
+    const affiliateUrl=
+      'https://s.shopee.vn/an_redir'
+      +'?origin_link='+encodeURIComponent(cleanUrl)
+      +'&affiliate_id='+encodeURIComponent(AFFILIATE_ID)
+      +'&sub_id='+encodeURIComponent(subId+'----');
+
+    // Keep a local click record only as a temporary frontend record.
+    // Production backend should persist this server-side once enabled.
+    if(state&&state.clicks){
+      state.clicks.push({
+        id:'C'+Date.now(),
+        userId:state.user&&state.user.id,
+        originalUrl:raw,
+        cleanUrl,
+        affiliateUrl,
+        subId,
+        shopId:result.shopId||'',
+        itemId:result.itemId||'',
+        createdAt:new Date().toISOString()
+      });
+      try{save()}catch(e){}
+    }
+
+    if(newTab){
+      newTab.location.href=affiliateUrl;
+    }else{
+      window.location.href=affiliateUrl;
+    }
+  }catch(e){
+    if(newTab){
+      try{newTab.close()}catch(_){}
+    }
+    alert('Không thể tạo link hoàn tiền cho sản phẩm này. Vui lòng thử lại.');
+  }
+}
+
+$('#shopLink').addEventListener('input',updateShopeePreview);
+$('#shopLink').addEventListener('paste',()=>setTimeout(updateShopeePreview,0));
+
+document.addEventListener('click',e=>{
+  if(!e.target.closest('.bank-picker') && $('#bankResults'))$('#bankResults').classList.add('hidden');
+});
+loadBanks();
+showAuthState();
+</script></body></html>
