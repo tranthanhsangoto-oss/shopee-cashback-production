@@ -62,7 +62,8 @@ p{color:var(--muted);line-height:1.6}.muted{color:var(--muted);font-size:13px}.t
 .product{display:grid;grid-template-columns:120px 1fr;gap:14px;align-items:center}.productimg{width:120px;height:120px;border-radius:16px;background:#fff0eb;display:grid;place-items:center;font-size:34px}
 .howto{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}.step{border:1px solid var(--line);background:#fff;border-radius:16px;padding:12px}.ph{height:86px;border:1px dashed #efb9aa;border-radius:12px;background:#fff7f4;display:grid;place-items:center;color:#a36656;font-size:11px;text-align:center;padding:8px}.num{margin-top:10px;width:26px;height:26px;border-radius:8px;background:#fff0ec;color:var(--brand);display:grid;place-items:center;font-weight:900;font-size:11px}
 @media(max-width:760px){.grid,.grid3{grid-template-columns:1fr}.howto{grid-template-columns:1fr 1fr}.product{grid-template-columns:90px 1fr}.productimg{width:90px;height:90px}.topbar{padding:11px 12px}.page{padding:15px 12px}.stat .val{font-size:25px}}
-</style></head>
+</style><script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
 <body>
 <div id="loginScreen" class="login-screen">
   <div class="login-card">
@@ -229,21 +230,55 @@ p{color:var(--muted);line-height:1.6}.muted{color:var(--muted);font-size:13px}.t
 
 <script>
 const KEY='shopeeCashbackProductionStateV1';
-const PRODUCTION_BACKEND={
-  enabled:false,
-  provider:'supabase',
-  note:'Set enabled=true and connect Supabase Auth/Database before public launch.'
-};
-function requireProductionBackend(){
-  if(!PRODUCTION_BACKEND.enabled){
-    alert('Production backend chưa được cấu hình. Hãy kết nối Supabase trước khi public website.');
-    return false;
-  }
-  return true;
-}
+const SUPABASE_URL="https://jqzyytgzqpjpgbtuirmn.supabase.co";
+const SUPABASE_PUBLISHABLE_KEY="sb_publishable_ANZU3Mus2Xag_qg9xQ2qNw_BqPgrMhv";
+const sb=window.supabase.createClient(SUPABASE_URL,SUPABASE_PUBLISHABLE_KEY);
+
 function productionGoogleLogin(){
-  if(!requireProductionBackend())return;
-  // TODO: Supabase OAuth signInWithOAuth({provider:'google'})
+  alert('Đăng nhập Google sẽ được bổ sung sau. Hiện tại vui lòng dùng Tên đăng nhập + Mật khẩu.');
+}
+
+function normalizeUsername(v){
+  return String(v||'').trim().toLowerCase().replace(/[^a-z0-9._-]/g,'');
+}
+
+function usernameToInternalEmail(username){
+  const u=normalizeUsername(username);
+  return u ? u+'@users.shopee-cashback.example.com' : '';
+}
+
+async function getOwnProfile(userId){
+  for(let i=0;i<6;i++){
+    const {data,error}=await sb
+      .from('profiles')
+      .select('id,username,display_name,role,is_locked,created_at')
+      .eq('id',userId)
+      .maybeSingle();
+    if(!error && data)return data;
+    await new Promise(r=>setTimeout(r,250));
+  }
+  return null;
+}
+
+async function setSignedInUser(authUser){
+  const profile=await getOwnProfile(authUser.id);
+  if(!profile)throw new Error('Không thể tải hồ sơ tài khoản.');
+
+  if(profile.is_locked){
+    await sb.auth.signOut();
+    throw new Error('Tài khoản đang bị khóa. Vui lòng liên hệ admin.');
+  }
+
+  state.currentUserId=profile.id;
+  state.user={
+    id:profile.id,
+    name:profile.display_name||profile.username,
+    username:profile.username,
+    email:'',
+    role:profile.role||'user'
+  };
+  save();
+  return state.user;
 }
 
 const $=s=>document.querySelector(s);
@@ -328,24 +363,27 @@ window.addEventListener('storage',e=>{
 });
 
 
-function syncActiveUser(){
-  state=load();
-  if(!state.currentUserId) return false;
-  const acct=state.accounts.find(x=>x.id===state.currentUserId);
-  const wasDeleted=(state.deletedUserIds||[]).includes(state.currentUserId);
-  if(!acct || wasDeleted || acct.status!=='active'){
+async function showAuthState(){
+  const {data}=await sb.auth.getSession();
+  const session=data&&data.session;
+
+  if(!session||!session.user){
     state.currentUserId=null;
-    save();
-    return false;
+    $('#loginScreen').classList.remove('hidden');
+    $('#appRoot').classList.add('hidden');
+    return;
   }
-  state.user={id:acct.id,name:acct.name,email:acct.email};
-  return true;
-}
-function showAuthState(){
-  const logged=syncActiveUser();
-  $('#loginScreen').classList.toggle('hidden',logged);
-  $('#appRoot').classList.toggle('hidden',!logged);
-  if(logged) render();
+
+  try{
+    await setSignedInUser(session.user);
+    $('#loginScreen').classList.add('hidden');
+    $('#appRoot').classList.remove('hidden');
+    render();
+  }catch(e){
+    $('#appRoot').classList.add('hidden');
+    $('#loginScreen').classList.remove('hidden');
+    alert(e.message||'Không thể đăng nhập.');
+  }
 }
 
 function showAuthTab(tab){
@@ -355,15 +393,18 @@ function showAuthTab(tab){
   $('#loginTabBtn').classList.toggle('active',isLogin);
   $('#registerTabBtn').classList.toggle('active',!isLogin);
 }
-function registerLocalAccount(){
-  if(!requireProductionBackend())return;
+async function registerLocalAccount(){
   const name=$('#regName').value.trim();
-  const username=$('#regUsername').value.trim();
+  const username=normalizeUsername($('#regUsername').value);
   const password=$('#regPassword').value;
   const password2=$('#regPassword2').value;
 
   if(!name||!username||!password||!password2){
     alert('Vui lòng nhập đầy đủ thông tin.');
+    return;
+  }
+  if(username.length<3){
+    alert('Tên đăng nhập phải có ít nhất 3 ký tự và chỉ dùng chữ thường, số, dấu chấm, gạch dưới hoặc gạch ngang.');
     return;
   }
   if(password.length<6){
@@ -374,54 +415,81 @@ function registerLocalAccount(){
     alert('Hai mật khẩu không trùng nhau.');
     return;
   }
-  if(state.accounts.some(x=>(x.username||'').toLowerCase()===username.toLowerCase())){
-    alert('Tên đăng nhập đã tồn tại.');
+
+  const email=usernameToInternalEmail(username);
+
+  const {data,error}=await sb.auth.signUp({
+    email,
+    password,
+    options:{
+      data:{
+        username,
+        display_name:name
+      }
+    }
+  });
+
+  if(error){
+    const msg=String(error.message||'');
+    if(/already|registered|exists/i.test(msg)){
+      alert('Tên đăng nhập đã được sử dụng.');
+    }else{
+      alert('Không thể tạo tài khoản: '+msg);
+    }
     return;
   }
 
-  const id='U'+String(Date.now()).slice(-6);
-  state.accounts.push({
-    id,name,email:'',username,password,
-    authType:'local',status:'active',
-    createdAt:new Date().toISOString()
-  });
-  state.currentUserId=id;
-  state.user={id,name,email:''};
-  state.notifications.push({
-    id:'N'+Date.now(),
-    userId:id,
-    title:'Tạo tài khoản thành công',
-    message:'Chào mừng '+name+' đến với Shopee Cashback.',
-    read:false,
-    createdAt:new Date().toISOString()
-  });
-  save();
-  showAuthState();
+  if(!data||!data.user){
+    alert('Không thể tạo tài khoản.');
+    return;
+  }
+
+  try{
+    await setSignedInUser(data.user);
+    state.notifications.push({
+      id:'N'+Date.now(),
+      userId:data.user.id,
+      title:'Tạo tài khoản thành công',
+      message:'Chào mừng '+name+' đến với Shopee Cashback.',
+      read:false,
+      createdAt:new Date().toISOString()
+    });
+    save();
+    await showAuthState();
+  }catch(e){
+    alert(e.message||'Tài khoản đã tạo nhưng chưa tải được hồ sơ.');
+  }
 }
-function localLogin(){
-  if(!requireProductionBackend())return;
-  state=load();
-  const username=$('#loginIdentity').value.trim().toLowerCase();
+
+async function localLogin(){
+  const username=normalizeUsername($('#loginIdentity').value);
   const password=$('#loginPassword').value;
-  const acct=state.accounts.find(x=>x.authType==='local' && (x.username||'').toLowerCase()===username);
-  if(!acct) return alert('Tên đăng nhập không tồn tại.');
-  if(acct.status!=='active') return alert('Tài khoản đang bị khóa. Vui lòng liên hệ admin.');
-  if(acct.password!==password) return alert('Mật khẩu không đúng.');
-  state.currentUserId=acct.id;
-  state.user={id:acct.id,name:acct.name,email:acct.email};
-  save();
-  showAuthState();
+
+  if(!username||!password){
+    alert('Vui lòng nhập tên đăng nhập và mật khẩu.');
+    return;
+  }
+
+  const email=usernameToInternalEmail(username);
+  const {data,error}=await sb.auth.signInWithPassword({email,password});
+
+  if(error||!data||!data.user){
+    alert('Tên đăng nhập hoặc mật khẩu không đúng.');
+    return;
+  }
+
+  try{
+    await setSignedInUser(data.user);
+    await showAuthState();
+  }catch(e){
+    alert(e.message||'Không thể tải thông tin tài khoản.');
+  }
 }
-function devGoogleLogin(){
-  const acct=state.accounts.find(x=>x.authType==='google' && x.status==='active');
-  if(!acct) return alert('Chưa có tài khoản Google khả dụng.');
-  state.currentUserId=acct.id;
-  state.user={id:acct.id,name:acct.name,email:acct.email};
-  save();
-  showAuthState();
-}
-function logoutUser(){
+
+async function logoutUser(){
+  await sb.auth.signOut();
   state.currentUserId=null;
+  state.user={id:'',name:'',email:''};
   save();
   closePops();
   $('#appRoot').classList.add('hidden');
@@ -433,10 +501,15 @@ function closePops(){$('#notifPop').classList.add('hidden');$('#accountPop').cla
 function toggleNotif(){const p=$('#notifPop');const open=p.classList.contains('hidden');closePops();if(open){p.classList.remove('hidden');state.notifications.filter(n=>n.userId===state.user.id).forEach(n=>n.read=true);save();renderNotif()}}
 function toggleAccount(){const p=$('#accountPop');const open=p.classList.contains('hidden');closePops();if(open){p.classList.remove('hidden');$('#acctMenu').classList.remove('hidden');$('#acctEdit').classList.add('hidden')}}
 function showProfileEdit(){$('#acctMenu').classList.add('hidden');$('#acctEdit').classList.remove('hidden');$('#editName').value=state.user.name}
-function saveProfile(){
-  state.user.name=$('#editName').value.trim()||state.user.name;
-  const acct=state.accounts.find(x=>x.id===state.user.id);
-  if(acct)acct.name=state.user.name;
+async function saveProfile(){
+  const newName=$('#editName').value.trim();
+  if(!newName)return;
+  const {error}=await sb.from('profiles').update({display_name:newName}).eq('id',state.user.id);
+  if(error){
+    alert('Không thể cập nhật tên hiển thị.');
+    return;
+  }
+  state.user.name=newName;
   save();closePops();render();
 }
 function renderNotif(){const arr=state.notifications.filter(n=>n.userId===state.user.id).slice().reverse();const unread=arr.filter(n=>!n.read).length;$('#notifBadge').textContent=unread;$('#notifBadge').classList.toggle('hidden',unread===0);$('#notifList').innerHTML=arr.length?arr.map(n=>`<div class="pop-item"><b>${esc(n.title)}</b><div class="muted" style="margin-top:3px">${esc(n.message)}</div><div class="tiny" style="margin-top:4px">${new Date(n.createdAt).toLocaleString('vi-VN')}</div></div>`).join(''):'<div class="pop-item muted">Chưa có thông báo.</div>'}
@@ -811,5 +884,6 @@ document.addEventListener('click',e=>{
   if(!e.target.closest('.bank-picker') && $('#bankResults'))$('#bankResults').classList.add('hidden');
 });
 loadBanks();
+sb.auth.onAuthStateChange(()=>{ showAuthState(); });
 showAuthState();
 </script></body></html>
