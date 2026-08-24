@@ -704,9 +704,13 @@ function cleanShopeeProductUrl(raw){
 
   const host=url.hostname.toLowerCase().replace(/^www\./,'');
 
-  if(host!=='shopee.vn' && host!=='s.shopee.vn'){
-    return {ok:false,reason:'not_shopee'};
-  }
+  if(
+  host!=='shopee.vn' &&
+  host!=='s.shopee.vn' &&
+  host!=='vn.shp.ee'
+){
+  return {ok:false,reason:'not_shopee'};
+}
 
   if(host==='s.shopee.vn'){
     return {
