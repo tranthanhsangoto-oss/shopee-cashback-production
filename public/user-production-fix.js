@@ -40,7 +40,6 @@
     }
   }
 
-  // Prevent an admin account from being used as a normal cashback user.
   try{
     if(typeof setSignedInUser==='function'){
       const originalSetSignedInUser=setSignedInUser;
@@ -55,7 +54,21 @@
     }
   }catch(e){console.warn(e)}
 
-  // Avoid creating several pending records when the same button is double-tapped.
+  // Keep purchase_intents only for reconciliation. They are not real Shopee orders.
+  try{
+    if(typeof loadProductionCommerceData==='function'){
+      const originalLoadProductionCommerceData=loadProductionCommerceData;
+      loadProductionCommerceData=async function(){
+        await originalLoadProductionCommerceData();
+        if(Array.isArray(state?.orders)){
+          state.orders=state.orders.filter(o=>!o?.isIntent && o?.source!=='intent' && !String(o?.id||'').startsWith('WAIT-'));
+          save();
+        }
+      };
+    }
+  }catch(e){console.warn(e)}
+
+  // Avoid creating several pending reconciliation records when the same button is double-tapped.
   try{
     if(typeof createPendingPurchaseIntent==='function'){
       const originalCreatePendingPurchaseIntent=createPendingPurchaseIntent;
@@ -92,7 +105,6 @@
     });
   }
 
-  // Re-check existing session once the legacy page initialization has finished.
   setTimeout(enforceUserOnly,250);
   try{sb.auth.onAuthStateChange(()=>setTimeout(enforceUserOnly,150));}catch(e){}
 })();
