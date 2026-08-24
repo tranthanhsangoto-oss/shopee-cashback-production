@@ -1,759 +1,222 @@
-<!doctype html><html lang="vi"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Admin - Shopee Cashback</title><style>
-:root{
-  --brand:#ee4d2d;--brand2:#ff7454;--bg:#f6f7fb;--card:#fff;--text:#202634;--muted:#747d8f;
-  --line:#e8ebf1;--ok:#138a56;--warn:#b97900;--bad:#c83a3a;--shadow:0 12px 34px rgba(30,40,60,.08);
-}
-*{box-sizing:border-box}
-body{margin:0;font-family:Inter,ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;background:var(--bg);color:var(--text)}
-button,input,select,textarea{font:inherit}button{cursor:pointer}
-.wrap{max-width:1050px;margin:0 auto;min-height:100vh;padding-bottom:92px}
-.topbar{position:sticky;top:0;z-index:10;background:rgba(246,247,251,.94);backdrop-filter:blur(12px);border-bottom:1px solid var(--line);padding:13px 16px;display:flex;align-items:center;justify-content:space-between}
-.brand{display:flex;align-items:center;gap:10px;font-weight:900}
-.logo{width:38px;height:38px;border-radius:12px;background:linear-gradient(135deg,var(--brand),var(--brand2));color:#fff;display:grid;place-items:center;font-weight:900}
-.actions{display:flex;align-items:center;gap:8px;position:relative}
-.icon-btn,.avatar-btn{border:1px solid var(--line);background:#fff;border-radius:13px;min-height:40px}
-.icon-btn{width:40px;display:grid;place-items:center;position:relative}
-.avatar-btn{display:flex;align-items:center;gap:8px;padding:5px 9px 5px 6px}
-.avatar{width:30px;height:30px;border-radius:10px;background:#fff0ec;color:var(--brand);display:grid;place-items:center;font-weight:900}
-.badge{position:absolute;right:-3px;top:-4px;background:var(--brand);color:#fff;border:2px solid #fff;border-radius:99px;min-width:18px;height:18px;padding:0 4px;display:grid;place-items:center;font-size:10px;font-weight:900}
-.page{padding:20px 16px}.hidden{display:none!important}
-.card{background:#fff;border:1px solid var(--line);border-radius:20px;padding:17px;box-shadow:var(--shadow)}
-.grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
-h1{font-size:28px;margin:7px 0 9px;line-height:1.12}h2{font-size:20px;margin:0 0 13px}
-p{color:var(--muted);line-height:1.6}.muted{color:var(--muted);font-size:13px}.tiny{font-size:11px;color:var(--muted)}
-.eyebrow{font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--brand);font-weight:900}
-.btn{border:0;border-radius:13px;padding:12px 14px;font-weight:850}.primary{background:var(--brand);color:#fff}.ghost{background:#fff;border:1px solid var(--line);color:var(--text)}.soft{background:#fff0ec;color:var(--brand)}
-.full{width:100%}.btn:disabled{opacity:.45;cursor:not-allowed}
-.field label{display:block;font-size:11px;font-weight:850;color:var(--muted);margin-bottom:5px}.field input,.field select,.field textarea{width:100%;padding:11px 12px;border:1px solid var(--line);border-radius:12px;background:#fff}.field textarea{min-height:95px;resize:vertical}
-.row{display:flex;gap:9px;align-items:center}.row>*{min-width:0}.grow{flex:1}
-.nav{position:fixed;left:50%;transform:translateX(-50%);bottom:12px;width:min(94%,700px);background:rgba(255,255,255,.96);border:1px solid var(--line);box-shadow:0 15px 38px rgba(30,40,60,.17);border-radius:20px;padding:6px;display:grid;grid-template-columns:repeat(3,1fr);z-index:20}
-.nav button{border:0;background:transparent;border-radius:14px;padding:8px 4px;font-size:12px;font-weight:800;color:var(--muted)}.nav button.active{background:#fff0ec;color:var(--brand)}
-.stat{border-radius:18px;padding:16px;border:1px solid transparent}.stat .lab{font-size:12px;font-weight:850}.stat .val{font-size:28px;font-weight:950;letter-spacing:-.035em;margin-top:7px}.stat .desc{font-size:10px;line-height:1.45;margin-top:7px}
-.stat.wait{background:#fff6df;border-color:#f3db9e;color:#7b580e}.stat.avail{background:#fff0eb;border-color:#ffc8b8;color:#a33820;box-shadow:0 10px 24px rgba(238,77,45,.11)}.stat.received{background:#eaf8f1;border-color:#c7e9d8;color:#196c49}
-.status{display:inline-flex;padding:5px 8px;border-radius:99px;font-size:10px;font-weight:900}.s-pending{background:#fff4dc;color:#8b6000}.s-ok{background:#e7f6ee;color:#117246}.s-bad{background:#ffeded;color:#b53131}.s-info{background:#edf3ff;color:#3560a5}
-.order{display:grid;grid-template-columns:60px 1fr auto;gap:12px;align-items:start;padding:13px 0;border-bottom:1px solid var(--line)}.order:last-child{border-bottom:0}.thumb{width:60px;height:60px;border-radius:14px;background:#fff1ec;display:grid;place-items:center;font-size:22px}.amount{text-align:right;font-weight:900}
-.pop{position:absolute;right:0;top:47px;width:310px;background:#fff;border:1px solid var(--line);border-radius:18px;padding:9px;box-shadow:0 18px 44px rgba(30,40,60,.18);z-index:40}.pop-title{font-size:11px;font-weight:900;color:var(--muted);padding:6px 8px}.pop-item{padding:10px 8px;border-bottom:1px solid var(--line)}.pop-item:last-child{border-bottom:0}
-.menu-btn{width:100%;text-align:left;border:0;background:transparent;padding:10px;border-radius:11px}.menu-btn:hover{background:#f7f8fb}.danger{color:#b53131}
-.dev{border:1px dashed #e3a392;background:#fff9f6;border-radius:18px;padding:15px;margin-top:14px}.dev h3{font-size:14px;margin:0 0 10px;color:#9a3c25}.devtag{display:inline-flex;background:#202634;color:#fff;border-radius:99px;padding:4px 7px;font-size:9px;font-weight:900;margin-left:6px}
-.order-filters{display:grid;grid-template-columns:1.4fr 1fr 1fr auto;gap:9px;align-items:end;margin:10px 0 4px}
-.order-filters .field{min-width:0}
-@media(max-width:760px){.order-filters{grid-template-columns:1fr}.order-filters .btn{width:100%}}
-.table{width:100%;border-collapse:collapse;font-size:12px}.table th,.table td{padding:9px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top}.table th{font-size:10px;color:var(--muted);text-transform:uppercase}
-.modal-backdrop{position:fixed;inset:0;background:rgba(20,25,35,.45);display:grid;place-items:center;padding:18px;z-index:100}
-.modal-box{width:min(100%,460px);background:#fff;border:1px solid var(--line);border-radius:22px;padding:18px;box-shadow:0 24px 70px rgba(20,25,35,.25)}
-.modal-icon{width:46px;height:46px;border-radius:14px;display:grid;place-items:center;font-size:22px;margin-bottom:10px}
-.modal-icon.warn{background:#fff4dd;color:#9a6500}.modal-icon.danger{background:#ffeded;color:#b83232}.modal-icon.info{background:#edf3ff;color:#355fa2}
-.modal-actions{display:flex;gap:8px;justify-content:flex-end;margin-top:14px;flex-wrap:wrap}
-.modal-actions .btn{min-width:110px}
-.withdraw-card{cursor:pointer;transition:.15s ease}
-.withdraw-card:hover{border-color:#efb6a8;background:#fffaf8}
-.withdraw-detail-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:12px}
-.withdraw-big-amount{font-size:34px;font-weight:950;color:var(--brand);letter-spacing:-.03em}
-.bank-big{display:flex;align-items:center;gap:12px;background:#f8f9fb;border:1px solid var(--line);border-radius:16px;padding:12px;margin-top:12px}
-@media(max-width:620px){.withdraw-detail-grid{grid-template-columns:1fr}}
-
-.account-row{display:grid;grid-template-columns:minmax(130px,1.1fr) minmax(150px,1.2fr) 90px 90px auto;gap:9px;align-items:center;padding:11px 0;border-bottom:1px solid var(--line)}
-.account-row:last-child{border-bottom:0}
-.account-type{font-size:10px;font-weight:900;padding:5px 8px;border-radius:99px;display:inline-flex}
-.type-google{background:#eef3ff;color:#375f9e}.type-local{background:#fff0ec;color:#9e422a}
-.user-track-card{border:1px solid var(--line);border-radius:16px;margin-top:10px;overflow:hidden;background:#fff}
-.user-track-head{display:grid;grid-template-columns:minmax(150px,1.2fr) repeat(4,minmax(90px,.7fr)) auto;gap:10px;align-items:center;padding:13px}
-.user-track-detail{border-top:1px solid var(--line);background:#fafbfc;padding:12px}
-.user-order-mini{display:grid;grid-template-columns:minmax(170px,1.4fr) repeat(4,minmax(85px,.7fr));gap:8px;padding:9px 0;border-bottom:1px solid var(--line);font-size:11px;align-items:center}
-.user-order-mini:last-child{border-bottom:0}
-.ticket{border:1px solid var(--line);border-radius:15px;padding:13px;margin-top:9px}.reply{background:#edf8f2;border:1px solid #cde9da;border-radius:11px;padding:9px;margin-top:8px;font-size:12px;color:#256347}
-.note{background:#fff7e5;border:1px solid #f1d499;color:#805b10;border-radius:14px;padding:11px 13px;font-size:12px;line-height:1.55}
-.hero{background:linear-gradient(145deg,#fff,#fff3ef);border:1px solid #ffe0d7;border-radius:25px;padding:22px;box-shadow:var(--shadow)}
-.linkbox{margin-top:14px}.linkbox input{width:100%;padding:14px 15px;border:1px solid var(--line);border-radius:14px}
-.product{display:grid;grid-template-columns:120px 1fr;gap:14px;align-items:center}.productimg{width:120px;height:120px;border-radius:16px;background:#fff0eb;display:grid;place-items:center;font-size:34px}
-.howto{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}.step{border:1px solid var(--line);background:#fff;border-radius:16px;padding:12px}.ph{height:86px;border:1px dashed #efb9aa;border-radius:12px;background:#fff7f4;display:grid;place-items:center;color:#a36656;font-size:11px;text-align:center;padding:8px}.num{margin-top:10px;width:26px;height:26px;border-radius:8px;background:#fff0ec;color:var(--brand);display:grid;place-items:center;font-weight:900;font-size:11px}
-@media(max-width:760px){.grid,.grid3{grid-template-columns:1fr}.howto{grid-template-columns:1fr 1fr}.product{grid-template-columns:90px 1fr}.productimg{width:90px;height:90px}.topbar{padding:11px 12px}.page{padding:15px 12px}.stat .val{font-size:25px}}
-</style></head>
-<body><div class="wrap">
-<div class="topbar"><div class="brand"><div class="logo">A</div><span>Shopee Cashback Admin</span></div><div class="row"><span class="tiny" id="syncText">Production</span></div></div>
-
-<section class="page">
-  <div class="hero"><div class="eyebrow">Quản trị hệ thống</div><h1>Admin Dashboard</h1><p>Bản DEV dùng để test tương tác hai chiều với <b>user.html</b>. Thay đổi ở đây sẽ lưu vào cùng một localStorage.</p></div>
-
-  
-<div class="card" style="margin-top:14px">
-    <div class="row" style="justify-content:space-between;align-items:flex-start">
-      <div>
-        <h2 style="margin-bottom:4px">Đơn hàng</h2>
-        <div class="tiny">Mặc định sắp xếp đơn mới nhất lên trên.</div>
-      </div>
-      
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Shopee Cashback Admin</title>
+<style>
+:root{--bg:#f5f7fb;--card:#fff;--line:#e5e7eb;--text:#172033;--muted:#667085;--brand:#ee4d2d;--ok:#067647;--bad:#b42318}
+*{box-sizing:border-box}body{margin:0;font-family:Arial,sans-serif;background:var(--bg);color:var(--text)}
+.wrap{max-width:1220px;margin:auto;padding:24px}.card{background:#fff;border:1px solid var(--line);border-radius:16px;padding:18px;margin-bottom:18px}
+h1,h2{margin:0 0 12px}.muted{color:var(--muted)}input,button,select{font:inherit}input{padding:11px 12px;border:1px solid var(--line);border-radius:10px}
+button{padding:11px 14px;border:0;border-radius:10px;cursor:pointer}.primary{background:var(--brand);color:#fff;font-weight:700}
+.secondary{background:#fff;border:1px solid var(--line)}.hidden{display:none!important}table{border-collapse:collapse;width:100%;min-width:760px}
+th,td{padding:10px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top}th{background:#fafafa}.scroll{overflow:auto}
+.row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}.good{color:var(--ok)}.bad{color:var(--bad)}code{font-size:12px}
+</style>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+</head>
+<body>
+<div class="wrap">
+  <div id="loginBox" class="card">
+    <h1>Admin Production</h1>
+    <p class="muted">Đăng nhập bằng tài khoản đã được đặt <code>role = admin</code> trong Supabase.</p>
+    <div class="row">
+      <input id="adminUsername" placeholder="Tên đăng nhập">
+      <input id="adminPassword" type="password" placeholder="Mật khẩu">
+      <button class="primary" id="adminLoginBtn">Đăng nhập</button>
     </div>
-
-    <div class="order-filters">
-      <div class="field">
-        <label>Tìm đơn hàng</label>
-        <input id="orderSearch" placeholder="Tên sản phẩm / mã đơn / user" oninput="renderOrders()">
-      </div>
-      <div class="field">
-        <label>Trạng thái đơn hàng</label>
-        <select id="orderStatusFilter" onchange="renderOrders()">
-          <option value="">Tất cả</option>
-          <option>Đang xử lý</option>
-          <option>Đã nhận hàng</option>
-          <option>Hoàn thành</option>
-          <option>Đã hủy</option>
-        </select>
-      </div>
-      <div class="field">
-        <label>Trạng thái hoa hồng</label>
-        <select id="commissionStatusFilter" onchange="renderOrders()">
-          <option value="">Tất cả</option>
-          <option>Đang chờ</option>
-          <option>Đã xác nhận</option>
-          <option>Không hợp lệ</option>
-        </select>
-      </div>
-      <button class="btn ghost" onclick="resetOrderFilters()">Xóa lọc</button>
-    </div>
-
-    <div class="tiny" id="orderFilterCount" style="margin:8px 0 3px"></div>
-
-    <div style="overflow:auto">
-      <table class="table">
-        <thead>
-          <tr>
-            <th>Mã / Sản phẩm</th>
-            <th>User</th>
-            <th>Giá trị</th>
-            <th>Hoa hồng</th>
-            <th>Cashback</th>
-            <th>Trạng thái đơn</th>
-            <th>Trạng thái hoa hồng</th>
-            <th></th>
-          </tr>
-        </thead>
-        <tbody id="ordersTable"></tbody>
-      </table>
-    </div>
+    <div id="loginError" class="bad" style="margin-top:10px"></div>
   </div>
 
-  
-<div class="grid" style="margin-top:14px">
-    <div class="card"><h2>Yêu cầu rút tiền</h2><div id="withdrawList"></div></div>
-    <div class="card"><h2>Gửi thông báo cho User</h2><div class="field"><label>Tiêu đề</label><input id="nTitle" placeholder="Ví dụ: Cashback đã xác nhận"></div><div class="field" style="margin-top:8px"><label>Nội dung</label><textarea id="nMsg"></textarea></div><button class="btn primary full" style="margin-top:9px" onclick="sendNotif()">Gửi thông báo</button></div>
-  </div>
+  <div id="adminApp" class="hidden">
+    <div class="row" style="justify-content:space-between;margin-bottom:18px">
+      <div><h1>Quản trị Shopee Cashback</h1><div id="adminWho" class="muted"></div></div>
+      <button class="secondary" id="logoutBtn">Đăng xuất</button>
+    </div>
 
-  
-<div class="card" style="margin-top:14px"><div class="row" style="justify-content:space-between"><div><div class="eyebrow">Support Inbox</div><h2 style="margin-top:3px">Yêu cầu hỗ trợ</h2></div><span class="status s-pending" id="ticketCount">0 ticket</span></div><div id="ticketAdmin"></div></div>
-
-  
-<div class="grid3" style="margin-top:14px">
-    <div class="stat avail"><div class="lab">Đơn hàng</div><div class="val" id="kOrders">0</div><div class="desc">Tổng đơn trong DEV</div></div>
-    <div class="stat wait"><div class="lab">Rút tiền chờ xử lý</div><div class="val" id="kWithdraw">0</div><div class="desc">Cần admin kiểm tra</div></div>
-    <div class="stat received"><div class="lab">Support mới</div><div class="val" id="kTickets">0</div><div class="desc">Ticket đang chờ phản hồi</div></div>
-  </div>
-
-  
-<div class="card" style="margin-top:14px">
-    <div class="row" style="justify-content:space-between;align-items:flex-start">
-      <div>
-        <div class="eyebrow">Account Management</div>
-        <h2 style="margin-top:3px">Quản lý tài khoản User</h2>
-        <div class="tiny">Quản lý các tài khoản do user tự đăng ký: reset mật khẩu, khóa/mở khóa hoặc xóa tài khoản.</div>
+    <section class="card">
+      <h2>Import Báo cáo chuyển đổi Shopee</h2>
+      <p class="muted">Upload CSV/XLSX. Cùng một Order ID upload lại sẽ được cập nhật, không tạo trùng.</p>
+      <div class="row">
+        <input id="reportFile" type="file" accept=".csv,.xlsx,.xls">
+        <button class="primary" id="importBtn">Import báo cáo</button>
       </div>
-    </div>
-    <div id="accountList" style="margin-top:10px"></div>
+      <div id="importResult" class="muted" style="margin-top:10px"></div>
+    </section>
+
+    <section class="card">
+      <h2>Tài khoản</h2>
+      <div id="usersBox"></div>
+    </section>
+
+    <section class="card">
+      <h2>Đơn hàng đã import</h2>
+      <div id="ordersBox"></div>
+    </section>
   </div>
-
-  
-<div class="card" style="margin-top:14px">
-    <div class="row" style="justify-content:space-between;align-items:flex-start">
-      <div>
-        <div class="eyebrow">User Tracking</div>
-        <h2 style="margin-top:3px">Theo dõi người dùng & đơn đã mua</h2>
-        <div class="tiny">Bấm “Xem đơn” để xem toàn bộ sản phẩm từng user đã mua.</div>
-      </div>
-      <span class="status s-info" id="userCount">0 user</span>
-    </div>
-    <div id="userTrackingList" style="margin-top:10px"></div>
-  </div>
-
-  <div class="grid" style="margin-top:14px">
-    <div class="card"><h2>User DEV</h2><div class="field"><label>Tên</label><input id="uName"></div><button class="btn primary" style="margin-top:9px" onclick="saveUser()">Lưu user</button></div>
-    <div class="card"><h2>Hạng & quy tắc</h2>
-      <div class="tiny" style="margin-bottom:10px">Mỗi hạng có mốc cashback cần đạt và tỷ lệ hoàn tương ứng.</div>
-      <div class="grid">
-        <div class="field"><label>Đồng — từ bao nhiêu tiền</label><input id="tBronze" type="number" min="0"></div>
-        <div class="field"><label>Đồng — cashback %</label><input id="rBronze" type="number" min="0" max="100"></div>
-        <div class="field"><label>Bạc — từ bao nhiêu tiền</label><input id="tSilver" type="number" min="0"></div>
-        <div class="field"><label>Bạc — cashback %</label><input id="rSilver" type="number" min="0" max="100"></div>
-        <div class="field"><label>Vàng — từ bao nhiêu tiền</label><input id="tGold" type="number" min="0"></div>
-        <div class="field"><label>Vàng — cashback %</label><input id="rGold" type="number" min="0" max="100"></div>
-        <div class="field"><label>Bạch Kim — từ bao nhiêu tiền</label><input id="tPlat" type="number" min="0"></div>
-        <div class="field"><label>Bạch Kim — cashback %</label><input id="rPlat" type="number" min="0" max="100"></div>
-        <div class="field"><label>Kim Cương — từ bao nhiêu tiền</label><input id="tDia" type="number" min="0"></div>
-        <div class="field"><label>Kim Cương — cashback %</label><input id="rDia" type="number" min="0" max="100"></div>
-        <div class="field"><label>Rút tối thiểu</label><input id="minWd" type="number"></div>
-        <div class="field"><label>Rút tối đa / lần</label><input id="maxWd" type="number"></div>
-      </div>
-      <button class="btn primary" style="margin-top:9px" onclick="saveSettings()">Lưu quy tắc</button>
-    </div>
-  </div>
-
-  
-</section>
-
-
-<div id="withdrawDetailModal" class="modal-backdrop hidden" aria-hidden="true">
-  <div class="modal-box" style="width:min(100%,620px)" role="dialog" aria-modal="true">
-    <div class="modal-icon info">₫</div>
-    <div class="eyebrow">Kiểm tra trước khi chuyển tiền</div>
-    <h2 style="margin-top:4px">Chi tiết yêu cầu rút tiền</h2>
-    <div id="withdrawDetailContent"></div>
-    <div id="withdrawDetailActions" class="modal-actions"></div>
-  </div>
-</div>
-
-<div id="withdrawRejectModal" class="modal-backdrop hidden" aria-hidden="true">
-  <div class="modal-box" role="dialog" aria-modal="true" aria-labelledby="withdrawRejectTitle">
-    <div class="modal-icon danger">✕</div>
-    <h2 id="withdrawRejectTitle" style="margin-bottom:7px">Từ chối yêu cầu rút tiền</h2>
-    <div id="withdrawRejectSummary" class="muted" style="line-height:1.6"></div>
-
-    <div class="field" style="margin-top:13px">
-      <label>Lý do từ chối <span class="tiny">(không bắt buộc)</span></label>
-      <textarea id="withdrawRejectReason" placeholder="Ví dụ: Thông tin tài khoản ngân hàng chưa chính xác..."></textarea>
-    </div>
-
-    <div class="modal-actions">
-      <button class="btn ghost" onclick="closeWithdrawRejectModal()">Hủy</button>
-      <button class="btn primary" style="background:var(--bad)" onclick="confirmRejectWithdraw()">Xác nhận từ chối</button>
-    </div>
-  </div>
-</div>
-
-<div id="accountModal" class="modal-backdrop hidden" aria-hidden="true">
-  <div class="modal-box" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
-    <div id="modalIcon" class="modal-icon info">⚙</div>
-    <h2 id="modalTitle" style="margin-bottom:7px">Xác nhận</h2>
-    <div id="modalMessage" class="muted" style="line-height:1.6"></div>
-
-    <div id="resetPasswordFields" class="hidden" style="margin-top:13px">
-      <div class="field">
-        <label>Mật khẩu mới</label>
-        <input id="modalPassword1" type="password" placeholder="Tối thiểu 6 ký tự">
-      </div>
-      <div class="field" style="margin-top:9px">
-        <label>Nhập lại mật khẩu mới</label>
-        <input id="modalPassword2" type="password" placeholder="Nhập lại mật khẩu">
-      </div>
-      <div id="modalError" class="tiny" style="margin-top:7px;color:var(--bad)"></div>
-    </div>
-
-    <div class="modal-actions">
-      <button class="btn ghost" onclick="closeAccountModal()">Hủy</button>
-      <button id="modalConfirmBtn" class="btn primary" onclick="confirmAccountAction()">Xác nhận</button>
-    </div>
-  </div>
-</div>
 </div>
 
 <script>
-const KEY='shopeeCashbackProductionStateV1';
-const PRODUCTION_BACKEND={
-  enabled:false,
-  provider:'supabase',
-  note:'Connect Supabase before public launch.'
-};
+const SUPABASE_URL="https://jqzyytgzgpjpgbtuirmn.supabase.co";
+const SUPABASE_PUBLISHABLE_KEY="sb_publishable_ANZU3Mus2Xag_qg9xQ2qNw_BqPgrMhv";
+const sb=window.supabase.createClient(SUPABASE_URL,SUPABASE_PUBLISHABLE_KEY);
+let profiles=[],tiers=[];
+
 const $=s=>document.querySelector(s);
-const money=n=>new Intl.NumberFormat('vi-VN').format(Number(n||0))+'đ';
 const esc=s=>String(s??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m]));
-function initialState(){
- return {
-   user:{id:'U001',name:'Nguyễn An',email:'user@example.com'},
-   accounts:[],
-   currentUserId:null,
-   productionMode:true,
-   savedBankInfo:{},
-   settings:{minWithdraw:50000,maxWithdraw:2000000,tierRates:{bronze:60,silver:65,gold:70,platinum:75,diamond:80},tierThresholds:{bronze:0,silver:200000,gold:500000,platinum:1000000,diamond:5000000}},
-   clicks:[],
-   orders:[
-     {id:'OD001',userId:'U001',product:'Tai nghe Bluetooth',orderValue:320000,commission:24000,cashback:16800,orderStatus:'Hoàn thành',commissionStatus:'Đã xác nhận',createdAt:new Date(Date.now()-86400000*6).toISOString()},
-     {id:'OD002',userId:'U001',product:'Ốp điện thoại',orderValue:120000,commission:8000,cashback:5600,orderStatus:'Đã nhận hàng',commissionStatus:'Đang chờ',createdAt:new Date(Date.now()-86400000*2).toISOString()}
-   ],
-   withdrawals:[],
-   notifications:[
-     {id:'N1',userId:'U001',title:'Chào mừng bạn',message:'Dán link sản phẩm Shopee để bắt đầu nhận hoàn tiền.',read:false,createdAt:new Date().toISOString()}
-   ],
-   tickets:[],
-   dev:{lastUpdate:new Date().toISOString()}
- };
-}
-function load(){
- let s;try{s=JSON.parse(localStorage.getItem(KEY)||'null')}catch(e){}
- if(!s)s=initialState();
- if(!s.tickets)s.tickets=[]; if(!s.notifications)s.notifications=[]; if(!s.withdrawals)s.withdrawals=[]; if(!s.orders)s.orders=[]; if(!s.clicks)s.clicks=[]; if(!s.settings.tierThresholds)s.settings.tierThresholds={bronze:0,silver:200000,gold:500000,platinum:1000000,diamond:5000000}; if(!s.accounts)s.accounts=[{id:'U001',name:s.user?.name||'Nguyễn An',email:s.user?.email||'user@example.com',username:'nguyenan',password:'123456',authType:'local',status:'active',createdAt:new Date().toISOString()}]; if(s.currentUserId===undefined)s.currentUserId=null; if(!s.deletedUserIds)s.deletedUserIds=[]; if(!s.savedBankInfo)s.savedBankInfo={};
- return s;
-}
-let state=load();
-function save(){state.dev={...(state.dev||{}),lastUpdate:new Date().toISOString()};localStorage.setItem(KEY,JSON.stringify(state))}
+const norm=s=>String(s||'').trim().toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[_\-]+/g,' ').replace(/\s+/g,' ');
+const cleanSub=s=>String(s||'').trim().replace(/-+$/,'');
 
-function statusClass(s){s=(s||'').toLowerCase();if(s.includes('xác nhận')||s.includes('hoàn thành')||s.includes('đã trả')||s.includes('đã phản hồi'))return's-ok';if(s.includes('hủy')||s.includes('từ chối')||s.includes('không'))return's-bad';if(s.includes('chờ'))return's-pending';return's-info'}
-function tier(total){
-  const r=state.settings.tierRates,t=state.settings.tierThresholds;
-  if(total>=t.diamond)return['Kim Cương',r.diamond];
-  if(total>=t.platinum)return['Bạch Kim',r.platinum];
-  if(total>=t.gold)return['Vàng',r.gold];
-  if(total>=t.silver)return['Bạc',r.silver];
-  return['Đồng',r.bronze];
+function internalEmail(username){
+  return String(username||'').trim().toLowerCase()+'@users.shopee-cashback.example.com';
+}
+function pick(row,names){
+  const es=Object.entries(row||{});
+  for(const n of names){
+    const f=es.find(([k])=>norm(k)===norm(n)); if(f)return f[1];
+  }
+  for(const n of names){
+    const f=es.find(([k])=>norm(k).includes(norm(n))); if(f)return f[1];
+  }
+  return '';
+}
+function money(v){
+  if(typeof v==='number')return Number.isFinite(v)?v:0;
+  const s=String(v??'').replace(/[^0-9,.-]/g,'');
+  if(!s)return 0;
+  if(/^\d{1,3}([.,]\d{3})+$/.test(s))return Number(s.replace(/[.,]/g,''));
+  return Number(s.replace(/,/g,''))||0;
+}
+function invalidStatus(s){
+  const n=norm(s); return n.includes('khong hop le')||n.includes('invalid')||n.includes('huy');
+}
+function confirmedStatus(s){
+  const n=norm(s); return n.includes('da xac nhan')||n.includes('confirmed')||n.includes('hoan thanh')||n.includes('thanh cong');
 }
 
-const FALLBACK_BANKS=[{"shortName": "ABBANK", "name": "Ngân hàng TMCP An Bình", "code": "ABB", "logo": "https://api.vietqr.io/img/ABB.png"}, {"shortName": "ACB", "name": "Ngân hàng TMCP Á Châu", "code": "ACB", "logo": "https://api.vietqr.io/img/ACB.png"}, {"shortName": "Bac A Bank", "name": "Ngân hàng TMCP Bắc Á", "code": "BAB", "logo": "https://api.vietqr.io/img/BAB.png"}, {"shortName": "BIDV", "name": "Ngân hàng TMCP Đầu tư và Phát triển Việt Nam", "code": "BIDV", "logo": "https://api.vietqr.io/img/BIDV.png"}, {"shortName": "BVBank", "name": "Ngân hàng TMCP Bản Việt", "code": "BVB", "logo": "https://api.vietqr.io/img/BVB.png"}, {"shortName": "CBBank", "name": "Ngân hàng Xây dựng", "code": "CBB", "logo": "https://api.vietqr.io/img/CBB.png"}, {"shortName": "CIMB", "name": "CIMB Việt Nam", "code": "CIMB", "logo": "https://api.vietqr.io/img/CIMB.png"}, {"shortName": "Co-opBank", "name": "Ngân hàng Hợp tác xã Việt Nam", "code": "COOPBANK", "logo": "https://api.vietqr.io/img/COOPBANK.png"}, {"shortName": "Eximbank", "name": "Ngân hàng TMCP Xuất Nhập khẩu Việt Nam", "code": "EIB", "logo": "https://api.vietqr.io/img/EIB.png"}, {"shortName": "GPBank", "name": "Ngân hàng GPBank", "code": "GPB", "logo": "https://api.vietqr.io/img/GPB.png"}, {"shortName": "HDBank", "name": "Ngân hàng TMCP Phát triển TP.HCM", "code": "HDB", "logo": "https://api.vietqr.io/img/HDB.png"}, {"shortName": "Hong Leong Bank", "name": "Hong Leong Bank Việt Nam", "code": "HLBVN", "logo": "https://api.vietqr.io/img/HLBVN.png"}, {"shortName": "HSBC", "name": "HSBC Việt Nam", "code": "HSBC", "logo": "https://api.vietqr.io/img/HSBC.png"}, {"shortName": "KienlongBank", "name": "Ngân hàng TMCP Kiên Long", "code": "KLB", "logo": "https://api.vietqr.io/img/KLB.png"}, {"shortName": "LPBank", "name": "Ngân hàng TMCP Lộc Phát Việt Nam", "code": "LPB", "logo": "https://api.vietqr.io/img/LPB.png"}, {"shortName": "MB Bank", "name": "Ngân hàng TMCP Quân đội", "code": "MB", "logo": "https://api.vietqr.io/img/MB.png"}, {"shortName": "MSB", "name": "Ngân hàng TMCP Hàng Hải Việt Nam", "code": "MSB", "logo": "https://api.vietqr.io/img/MSB.png"}, {"shortName": "Nam A Bank", "name": "Ngân hàng TMCP Nam Á", "code": "NAB", "logo": "https://api.vietqr.io/img/NAB.png"}, {"shortName": "NCB", "name": "Ngân hàng TMCP Quốc Dân", "code": "NCB", "logo": "https://api.vietqr.io/img/NCB.png"}, {"shortName": "OCB", "name": "Ngân hàng TMCP Phương Đông", "code": "OCB", "logo": "https://api.vietqr.io/img/OCB.png"}, {"shortName": "PGBank", "name": "Ngân hàng TMCP Thịnh vượng và Phát triển", "code": "PGB", "logo": "https://api.vietqr.io/img/PGB.png"}, {"shortName": "Public Bank Vietnam", "name": "Public Bank Việt Nam", "code": "PBVN", "logo": "https://api.vietqr.io/img/PBVN.png"}, {"shortName": "PVcomBank", "name": "Ngân hàng TMCP Đại Chúng Việt Nam", "code": "PVCB", "logo": "https://api.vietqr.io/img/PVCB.png"}, {"shortName": "Sacombank", "name": "Ngân hàng TMCP Sài Gòn Thương Tín", "code": "STB", "logo": "https://api.vietqr.io/img/STB.png"}, {"shortName": "Saigonbank", "name": "Ngân hàng TMCP Sài Gòn Công Thương", "code": "SGB", "logo": "https://api.vietqr.io/img/SGB.png"}, {"shortName": "SeABank", "name": "Ngân hàng TMCP Đông Nam Á", "code": "SEAB", "logo": "https://api.vietqr.io/img/SEAB.png"}, {"shortName": "SHB", "name": "Ngân hàng TMCP Sài Gòn - Hà Nội", "code": "SHB", "logo": "https://api.vietqr.io/img/SHB.png"}, {"shortName": "Shinhan Bank", "name": "Shinhan Bank Việt Nam", "code": "SHBVN", "logo": "https://api.vietqr.io/img/SHBVN.png"}, {"shortName": "Techcombank", "name": "Ngân hàng TMCP Kỹ thương Việt Nam", "code": "TCB", "logo": "https://api.vietqr.io/img/TCB.png"}, {"shortName": "TPBank", "name": "Ngân hàng TMCP Tiên Phong", "code": "TPB", "logo": "https://api.vietqr.io/img/TPB.png"}, {"shortName": "UOB", "name": "UOB Việt Nam", "code": "UOB", "logo": "https://api.vietqr.io/img/UOB.png"}, {"shortName": "VIB", "name": "Ngân hàng TMCP Quốc tế Việt Nam", "code": "VIB", "logo": "https://api.vietqr.io/img/VIB.png"}, {"shortName": "VietABank", "name": "Ngân hàng TMCP Việt Á", "code": "VAB", "logo": "https://api.vietqr.io/img/VAB.png"}, {"shortName": "Vietbank", "name": "Ngân hàng TMCP Việt Nam Thương Tín", "code": "VBB", "logo": "https://api.vietqr.io/img/VBB.png"}, {"shortName": "Vietcombank", "name": "Ngân hàng TMCP Ngoại thương Việt Nam", "code": "VCB", "logo": "https://api.vietqr.io/img/VCB.png"}, {"shortName": "VietinBank", "name": "Ngân hàng TMCP Công thương Việt Nam", "code": "ICB", "logo": "https://api.vietqr.io/img/ICB.png"}, {"shortName": "VPBank", "name": "Ngân hàng TMCP Việt Nam Thịnh Vượng", "code": "VPB", "logo": "https://api.vietqr.io/img/VPB.png"}, {"shortName": "VRB", "name": "Ngân hàng Liên doanh Việt - Nga", "code": "VRB", "logo": "https://api.vietqr.io/img/VRB.png"}, {"shortName": "Woori Bank", "name": "Woori Bank Việt Nam", "code": "WVN", "logo": "https://api.vietqr.io/img/WVN.png"}, {"shortName": "Agribank", "name": "Ngân hàng Nông nghiệp và Phát triển Nông thôn Việt Nam", "code": "VBA", "logo": "https://api.vietqr.io/img/VBA.png"}];
-let BANKS=FALLBACK_BANKS.slice();
+async function requireAdmin(){
+  const {data}=await sb.auth.getSession();
+  const user=data?.session?.user;
+  if(!user)return null;
+  const {data:p}=await sb.from('profiles').select('id,username,display_name,role,is_locked').eq('id',user.id).maybeSingle();
+  if(!p||p.role!=='admin'||p.is_locked){await sb.auth.signOut();return null}
+  return p;
+}
 
-async function loadBanks(){
+async function login(){
+  $('#loginError').textContent='';
+  const u=$('#adminUsername').value.trim().toLowerCase();
+  const p=$('#adminPassword').value;
+  const {error}=await sb.auth.signInWithPassword({email:internalEmail(u),password:p});
+  if(error){$('#loginError').textContent='Tên đăng nhập hoặc mật khẩu không đúng.';return}
+  const admin=await requireAdmin();
+  if(!admin){$('#loginError').textContent='Tài khoản này không có quyền Admin.';return}
+  await showApp(admin);
+}
+
+async function showApp(admin){
+  $('#loginBox').classList.add('hidden'); $('#adminApp').classList.remove('hidden');
+  $('#adminWho').textContent=admin.display_name+' · '+admin.username;
+  await loadData();
+}
+async function loadData(){
+  const [pRes,tRes,oRes]=await Promise.all([
+    sb.from('profiles').select('id,username,display_name,tracking_code,role,is_locked,created_at').order('created_at',{ascending:false}),
+    sb.from('cashback_tiers').select('*').order('sort_order'),
+    sb.from('orders').select('*').order('updated_at',{ascending:false}).limit(500)
+  ]);
+  if(pRes.error)throw pRes.error;
+  profiles=pRes.data||[]; tiers=tRes.data||[];
+  renderUsers();
+  renderOrders(oRes.data||[],oRes.error);
+}
+
+function renderUsers(){
+  $('#usersBox').innerHTML='<div class="scroll"><table><thead><tr><th>Tên</th><th>Username</th><th>Tracking/Sub ID</th><th>Role</th><th>Trạng thái</th></tr></thead><tbody>'+
+  profiles.map(p=>`<tr><td>${esc(p.display_name)}</td><td>${esc(p.username)}</td><td><b>${esc(p.tracking_code||'—')}</b></td><td>${esc(p.role)}</td><td>${p.is_locked?'Đã khóa':'Hoạt động'}</td></tr>`).join('')+
+  '</tbody></table></div>';
+}
+function renderOrders(rows,error){
+  if(error){$('#ordersBox').innerHTML='<div class="bad">'+esc(error.message)+'</div>';return}
+  if(!rows.length){$('#ordersBox').innerHTML='<div class="muted">Chưa có đơn.</div>';return}
+  $('#ordersBox').innerHTML='<div class="scroll"><table><thead><tr><th>Order ID</th><th>User</th><th>Sản phẩm</th><th>Hoa hồng Shopee</th><th>Cashback</th><th>Trạng thái</th></tr></thead><tbody>'+
+  rows.map(o=>{const p=profiles.find(x=>x.id===o.user_id);return `<tr><td>${esc(o.order_id)}</td><td>${esc(p?.display_name||o.user_id)}</td><td>${esc(o.product_name||'—')}</td><td>${Number(o.shopee_commission||0).toLocaleString('vi-VN')}đ</td><td><b>${Number(o.cashback_amount||0).toLocaleString('vi-VN')}đ</b></td><td>${esc(o.normalized_status)}</td></tr>`}).join('')+
+  '</tbody></table></div>';
+}
+
+async function rateForUser(userId){
+  const {data:sum,error}=await sb.rpc('confirmed_cashback_for_user',{target_user:userId});
+  if(error)throw error;
+  const total=Number(sum||0);
+  const eligible=[...tiers].filter(t=>total>=Number(t.min_confirmed_cashback||0)).sort((a,b)=>Number(b.min_confirmed_cashback)-Number(a.min_confirmed_cashback));
+  return Number(eligible[0]?.cashback_rate ?? 0.60);
+}
+
+function parseRow(row){
+  const orderId=String(pick(row,['Order id','Order ID','Mã đơn hàng','ID đơn hàng'])||'').trim();
+  const subId=cleanSub(pick(row,['Sub_id','Sub id','Sub ID','sub_id']));
+  const productName=String(pick(row,['Tên sản phẩm','Thông tin sản phẩm','Product Name'])||'').trim();
+  const shopName=String(pick(row,['Tên Shop','Tên shop','Shop Name','Thông tin cửa hàng'])||'').trim();
+  const orderValue=money(pick(row,['Giá trị đơn hàng','Order Value']));
+  const productCommission=money(pick(row,['Hoa hồng sản phẩm','Product Commission']));
+  const orderCommission=money(pick(row,['Hoa hồng đơn hàng','Order Commission']));
+  const xtraCommission=money(pick(row,['Hoa hồng Xtra','Xtra Commission']));
+  const commission=Math.max(0,productCommission+orderCommission+xtraCommission);
+  const orderStatus=String(pick(row,['Trạng thái đơn hàng','Order Status'])||'').trim();
+  const commissionStatus=String(pick(row,['Trạng thái hoa hồng','Commission Status','Trạng thái ghi nhận'])||'').trim();
+  const orderedAt=pick(row,['Thời Gian Đặt Hàng','Thời gian đặt hàng','Order Time']);
+  return {orderId,subId,productName,shopName,orderValue,commission,orderStatus,commissionStatus,orderedAt};
+}
+
+async function importReport(){
+  const file=$('#reportFile').files?.[0]; if(!file)return alert('Chọn file báo cáo trước.');
+  $('#importResult').textContent='Đang xử lý...';
   try{
-    const r=await fetch('https://api.vietqr.io/v2/banks',{cache:'no-store'});
-    const j=await r.json();
-    if(Array.isArray(j.data)&&j.data.length){
-      BANKS=j.data.map(b=>({
-        shortName:b.shortName||b.short_name||b.code||b.name,
-        name:b.name||b.shortName||b.code,
-        code:b.code||b.shortName||'',
-        bin:b.bin||'',
-        logo:b.logo||''
-      })).sort((x,y)=>(x.shortName||'').localeCompare(y.shortName||'','vi'));
+    if(!profiles.length||!tiers.length)await loadData();
+    const wb=XLSX.read(await file.arrayBuffer(),{type:'array'});
+    const rows=XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]],{defval:''});
+    let matched=0,unmatched=0,skipped=0;
+
+    for(const raw of rows){
+      const r=parseRow(raw);
+      if(!r.orderId){skipped++;continue}
+      const p=profiles.find(x=>cleanSub(x.tracking_code)===r.subId);
+      if(!p){unmatched++;continue}
+
+      const rate=await rateForUser(p.id);
+      const normalized=invalidStatus(r.commissionStatus)?'invalid':confirmedStatus(r.commissionStatus)?'confirmed':'pending';
+      const cashback=normalized==='invalid'?0:Math.round(r.commission*rate);
+
+      const payload={
+        order_id:r.orderId,user_id:p.id,sub_id:r.subId,product_name:r.productName,shop_name:r.shopName,
+        order_value:r.orderValue,shopee_commission:r.commission,cashback_rate:rate,cashback_amount:cashback,
+        order_status:r.orderStatus,commission_status:r.commissionStatus,normalized_status:normalized,
+        source_imported_at:new Date().toISOString(),updated_at:new Date().toISOString()
+      };
+      if(r.orderedAt)payload.ordered_at=new Date(r.orderedAt).toISOString();
+
+      const {error}=await sb.from('orders').upsert(payload,{onConflict:'order_id'});
+      if(error)throw error;
+      matched++;
     }
-  }catch(e){}
-  if(typeof renderBankOptions==='function')renderBankOptions();
-}
-function bankByName(v){
-  const q=(v||'').trim().toLowerCase();
-  return BANKS.find(b=>[b.shortName,b.name,b.code,b.bin].filter(Boolean).some(x=>String(x).toLowerCase()===q))
-    || BANKS.find(b=>(b.shortName||'').toLowerCase().includes(q)||(b.name||'').toLowerCase().includes(q));
-}
-function bankLogoHtml(bank,size=34){
-  if(!bank)return '<div style="width:'+size+'px;height:'+size+'px;border-radius:9px;background:#f0f2f6;display:grid;place-items:center;font-size:10px;font-weight:900">BANK</div>';
-  if(bank.logo)return '<img src="'+esc(bank.logo)+'" alt="'+esc(bank.shortName||bank.name)+'" style="width:'+size+'px;height:'+size+'px;object-fit:contain;border-radius:8px;background:#fff;border:1px solid var(--line);padding:3px" onerror="this.style.display=\'none\'">';
-  return '<div style="width:'+size+'px;height:'+size+'px;border-radius:9px;background:#f0f2f6;display:grid;place-items:center;font-size:9px;font-weight:900">'+esc((bank.shortName||bank.code||'BANK').slice(0,5))+'</div>';
-}
 
-window.addEventListener('storage',e=>{if(e.key===KEY){state=load(); if(typeof render==='function')render();}});
-
-function notify(title,message,userId=state.user.id){state.notifications.push({id:'N'+Date.now(),userId,title,message,read:false,createdAt:new Date().toISOString()})}
-function render(){$('#kOrders').textContent=state.orders.length;$('#kWithdraw').textContent=state.withdrawals.filter(w=>w.status==='Đang chờ').length;$('#kTickets').textContent=state.tickets.filter(t=>t.status==='Đang chờ').length;$('#uName').value=state.user.name;$('#tBronze').value=state.settings.tierThresholds.bronze;
-$('#tSilver').value=state.settings.tierThresholds.silver;
-$('#tGold').value=state.settings.tierThresholds.gold;
-$('#tPlat').value=state.settings.tierThresholds.platinum;
-$('#tDia').value=state.settings.tierThresholds.diamond;
-$('#rBronze').value=state.settings.tierRates.bronze;
-$('#rSilver').value=state.settings.tierRates.silver;
-$('#rGold').value=state.settings.tierRates.gold;
-$('#rPlat').value=state.settings.tierRates.platinum;
-$('#rDia').value=state.settings.tierRates.diamond;
-$('#minWd').value=state.settings.minWithdraw;
-$('#maxWd').value=state.settings.maxWithdraw;renderOrders();renderWithdrawals();renderTickets();renderUserTracking();renderAccounts();$('#syncText').textContent='Cập nhật '+new Date(state.dev?.lastUpdate||Date.now()).toLocaleTimeString('vi-VN')}
-
-
-function resetAccountPassword(id){
-  openAccountModal('reset',id);
-}
-
-function toggleAccountStatus(id){
-  const acct=state.accounts.find(x=>x.id===id);
-  if(!acct){
-    alert('Không tìm thấy tài khoản.');
-    return;
+    $('#importResult').innerHTML=`Đọc ${rows.length} dòng · cập nhật ${matched} đơn · không tìm thấy Sub ID ${unmatched} · bỏ qua ${skipped}.`;
+    await loadData();
+  }catch(e){
+    $('#importResult').textContent='Import lỗi: '+(e.message||e);
   }
-  openAccountModal(acct.status==='active'?'lock':'unlock',id);
 }
 
-function deleteAccount(id){
-  openAccountModal('delete',id);
-}
+$('#adminLoginBtn').onclick=login;
+$('#importBtn').onclick=importReport;
+$('#logoutBtn').onclick=async()=>{await sb.auth.signOut();location.reload()};
 
-function showToast(message){
-  let toast=$('#devToast');
-  if(!toast){
-    toast=document.createElement('div');
-    toast.id='devToast';
-    toast.style.cssText='position:fixed;right:18px;bottom:18px;z-index:120;background:#202634;color:#fff;padding:12px 14px;border-radius:13px;box-shadow:0 12px 30px rgba(20,25,35,.22);font-size:12px;font-weight:800;max-width:320px';
-    document.body.appendChild(toast);
-  }
-  toast.textContent=message;
-  toast.classList.remove('hidden');
-  clearTimeout(window.__devToastTimer);
-  window.__devToastTimer=setTimeout(()=>toast.classList.add('hidden'),2200);
-}
-
-function renderAccounts(){
-  const box=$('#accountList');
-  if(!box)return;
-  const activeAccounts=(state.accounts||[]).filter(ac=>!(state.deletedUserIds||[]).includes(ac.id));
-  box.innerHTML=activeAccounts.length?activeAccounts.map(ac=>`
-    <div class="account-row">
-      <div>
-        <b>${esc(ac.name)}</b>
-        <div class="tiny">${esc(ac.username||'Không có username')}</div>
-        
-      </div>
-      <div><div>${esc(ac.username||'—')}</div><div class="tiny">${esc(ac.id)}</div></div>
-      <div><span class="account-type ${ac.authType==='google'?'type-google':'type-local'}">${ac.authType==='google'?'Google':'Tài khoản'}</span></div>
-      <div><span class="status ${ac.status==='active'?'s-ok':'s-bad'}">${ac.status==='active'?'Hoạt động':'Đã khóa'}</span></div>
-      <div class="row" style="justify-content:flex-end;flex-wrap:wrap">
-        ${ac.authType==='local'?`<button class="btn ghost" style="padding:8px 9px" onclick="resetAccountPassword('${ac.id}')">Reset MK</button>`:''}
-        <button class="btn ghost" style="padding:8px 9px" onclick="toggleAccountStatus('${ac.id}')">${ac.status==='active'?'Khóa':'Mở khóa'}</button>
-        <button class="btn ghost danger" style="padding:8px 9px" onclick="deleteAccount('${ac.id}')">Xóa</button>
-      </div>
-    </div>`).join(''):'<p class="muted">Chưa có tài khoản.</p>';
-}
-
-function getAllUsers(){
-  return (state.accounts||[])
-    .filter(ac=>!(state.deletedUserIds||[]).includes(ac.id))
-    .map(ac=>({id:ac.id,name:ac.name,email:ac.email||'',username:ac.username||'',authType:ac.authType}));
-}
-function userStats(userId){
-  const orders=state.orders.filter(o=>o.userId===userId);
-  const totalValue=orders.reduce((s,o)=>s+Number(o.orderValue||0),0);
-  const confirmedCashback=orders.filter(o=>o.commissionStatus==='Đã xác nhận').reduce((s,o)=>s+Number(o.cashback||0),0);
-  return {orders,totalValue,confirmedCashback};
-}
-function toggleUserOrders(userId){
-  const el=$('#utrack_'+userId);
-  if(el) el.classList.toggle('hidden');
-}
-function renderUserTracking(){
-  const users=getAllUsers();
-  $('#userCount').textContent=users.length+' user';
-  $('#userTrackingList').innerHTML=users.length?users.map(u=>{
-    const s=userStats(u.id);
-    const tr=tier(s.confirmedCashback);
-    const detail=s.orders.length?s.orders.slice().reverse().map(o=>`
-      <div class="user-order-mini">
-        <div><b>${esc(o.product)}</b><div class="tiny">${new Date(o.createdAt).toLocaleDateString('vi-VN')}</div></div>
-        <div>${money(o.orderValue)}</div>
-        <div>${o.commissionStatus==='Không hợp lệ'?'0đ':money(o.cashback)}</div>
-        <div><span class="status ${statusClass(o.orderStatus)}">${esc(o.orderStatus)}</span></div>
-        <div><span class="status ${statusClass(o.commissionStatus)}">${esc(o.commissionStatus)}</span></div>
-      </div>`).join(''):'<div class="muted">User chưa có đơn hàng.</div>';
-    return `<div class="user-track-card">
-      <div class="user-track-head">
-        <div><b>${esc(u.name||u.id)}</b><div class="tiny">${esc((state.accounts.find(a=>a.id===u.id)?.username)||u.id)}</div></div>
-        <div><div class="tiny">Số đơn</div><b>${s.orders.length}</b></div>
-        <div><div class="tiny">Đã mua</div><b>${money(s.totalValue)}</b></div>
-        <div><div class="tiny">Cashback</div><b style="color:var(--ok)">${money(s.confirmedCashback)}</b></div>
-        <div><div class="tiny">Hạng</div><b>${esc(tr[0])}</b></div>
-        <button class="btn ghost" onclick="toggleUserOrders('${u.id}')">Xem đơn</button>
-      </div>
-      <div id="utrack_${u.id}" class="user-track-detail hidden">
-        <div class="user-order-mini" style="font-weight:900;color:var(--muted)">
-          <div>Sản phẩm</div><div>Giá trị</div><div>Cashback</div><div>Trạng thái đơn</div><div>Hoa hồng</div>
-        </div>
-        ${detail}
-      </div>
-    </div>`;
-  }).join(''):'<p class="muted">Chưa có user.</p>';
-}
-
-function saveUser(){
-  state.user.name=$('#uName').value.trim()||state.user.name;
-  const acct=state.accounts.find(x=>x.id===state.user.id);
-  if(acct)acct.name=state.user.name;
-  save();render();
-}
-function saveSettings(){
-  const thresholds={
-    bronze:Number($('#tBronze').value||0),
-    silver:Number($('#tSilver').value||0),
-    gold:Number($('#tGold').value||0),
-    platinum:Number($('#tPlat').value||0),
-    diamond:Number($('#tDia').value||0)
-  };
-  if(!(thresholds.bronze<=thresholds.silver && thresholds.silver<=thresholds.gold && thresholds.gold<=thresholds.platinum && thresholds.platinum<=thresholds.diamond)){
-    alert('Mốc hạng phải tăng dần: Đồng ≤ Bạc ≤ Vàng ≤ Bạch Kim ≤ Kim Cương.');
-    return;
-  }
-  state.settings.tierThresholds=thresholds;
-  state.settings.tierRates={
-    bronze:Number($('#rBronze').value||0),
-    silver:Number($('#rSilver').value||0),
-    gold:Number($('#rGold').value||0),
-    platinum:Number($('#rPlat').value||0),
-    diamond:Number($('#rDia').value||0)
-  };
-  state.settings.minWithdraw=Number($('#minWd').value||50000);
-  state.settings.maxWithdraw=Number($('#maxWd').value||2000000);
-  save();
-  render();
-  alert('Đã lưu mốc hạng và tỷ lệ cashback.');
-}
-function renderOrders(){
-  const search=($('#orderSearch')?.value||'').trim().toLowerCase();
-  const orderStatus=($('#orderStatusFilter')?.value||'');
-  const commissionStatus=($('#commissionStatusFilter')?.value||'');
-
-  const accountMap=new Map((state.accounts||[]).map(ac=>[ac.id,ac]));
-
-  let rows=state.orders.slice().sort((a,b)=>new Date(b.createdAt||0)-new Date(a.createdAt||0));
-
-  rows=rows.filter(o=>{
-    const ac=accountMap.get(o.userId);
-    const userText=((ac?.name||'')+' '+(ac?.username||'')+' '+(o.userId||'')).toLowerCase();
-    const matchSearch=!search ||
-      (o.product||'').toLowerCase().includes(search) ||
-      (o.id||'').toLowerCase().includes(search) ||
-      userText.includes(search);
-
-    const matchOrder=!orderStatus || o.orderStatus===orderStatus;
-    const matchCommission=!commissionStatus || o.commissionStatus===commissionStatus;
-    return matchSearch && matchOrder && matchCommission;
-  });
-
-  const countEl=$('#orderFilterCount');
-  if(countEl)countEl.textContent='Hiển thị '+rows.length+' / '+state.orders.length+' đơn';
-
-  $('#ordersTable').innerHTML=rows.length?rows.map(o=>{
-    const ac=accountMap.get(o.userId);
-    const userLabel=ac ? (ac.name+' · '+(ac.username||ac.id)) : o.userId;
-    return `<tr>
-      <td>
-        <div class="tiny">${esc(o.id)}</div>
-        <input value="${esc(o.product)}" onchange="editOrder('${o.id}','product',this.value)">
-        <div class="tiny" style="margin-top:4px">${new Date(o.createdAt||Date.now()).toLocaleString('vi-VN')}</div>
-      </td>
-      <td><div><b>${esc(userLabel)}</b></div><div class="tiny">${esc(o.userId)}</div></td>
-      <td><input style="width:90px" type="number" value="${o.orderValue}" onchange="editOrder('${o.id}','orderValue',this.value)"></td>
-      <td><input style="width:80px" type="number" value="${o.commission}" onchange="editOrder('${o.id}','commission',this.value)"></td>
-      <td>${o.commissionStatus==='Không hợp lệ'?'0đ':money(o.cashback)}</td>
-      <td>
-        <select onchange="editOrder('${o.id}','orderStatus',this.value)">
-          <option ${o.orderStatus==='Đang xử lý'?'selected':''}>Đang xử lý</option>
-          <option ${o.orderStatus==='Đã nhận hàng'?'selected':''}>Đã nhận hàng</option>
-          <option ${o.orderStatus==='Hoàn thành'?'selected':''}>Hoàn thành</option>
-          <option ${o.orderStatus==='Đã hủy'?'selected':''}>Đã hủy</option>
-        </select>
-      </td>
-      <td>
-        <select onchange="editOrder('${o.id}','commissionStatus',this.value)">
-          <option ${o.commissionStatus==='Đang chờ'?'selected':''}>Đang chờ</option>
-          <option ${o.commissionStatus==='Đã xác nhận'?'selected':''}>Đã xác nhận</option>
-          <option ${o.commissionStatus==='Không hợp lệ'?'selected':''}>Không hợp lệ</option>
-        </select>
-      </td>
-      <td><button class="btn ghost" onclick="delOrder('${o.id}')">Xóa</button></td>
-    </tr>`;
-  }).join(''):'<tr><td colspan="8" class="muted" style="padding:18px">Không có đơn phù hợp bộ lọc.</td></tr>';
-}
-
-function resetOrderFilters(){
-  if($('#orderSearch'))$('#orderSearch').value='';
-  if($('#orderStatusFilter'))$('#orderStatusFilter').value='';
-  if($('#commissionStatusFilter'))$('#commissionStatusFilter').value='';
-  renderOrders();
-}
-
-function editOrder(id,k,v){
-  const o=state.orders.find(x=>x.id===id);
-  if(!o)return;
-
-  const oldValue=o[k];
-  o[k]=['orderValue','commission'].includes(k)?Number(v):v;
-
-  const confirmedBeforeThis=state.orders
-    .filter(x=>x.userId===state.user.id && x.id!==o.id && statusClass(x.commissionStatus)==='s-ok')
-    .reduce((sum,x)=>sum+Number(x.cashback||0),0);
-  const currentRate=tier(confirmedBeforeThis)[1];
-
-  // Recalculate cashback whenever commission changes.
-  if(k==='commission'){
-    o.cashback = o.commissionStatus==='Không hợp lệ'
-      ? 0
-      : Math.round(o.commission*currentRate/100);
-  }
-
-  // Commission status controls whether cashback is payable.
-  if(k==='commissionStatus' && oldValue!==o[k]){
-    if(o[k]==='Không hợp lệ'){
-      o.cashback=0;
-      notify(
-        'Cashback không được ghi nhận',
-        'Đơn "'+o.product+'" không đủ điều kiện nhận cashback.'
-      );
-    }else if(o[k]==='Đã xác nhận'){
-      o.cashback=Math.round(Number(o.commission||0)*currentRate/100);
-      notify(
-        'Cashback đã được xác nhận',
-        'Đơn "'+o.product+'" đã được xác nhận. Bạn nhận được '+money(o.cashback)+' cashback.'
-      );
-    }else{
-      o.cashback=Math.round(Number(o.commission||0)*currentRate/100);
-      notify(
-        'Cập nhật trạng thái cashback',
-        'Cashback của đơn "'+o.product+'" hiện ở trạng thái "'+o[k]+'".'
-      );
-    }
-  }
-
-  if(k==='orderStatus' && oldValue!==o[k]){
-    notify(
-      'Cập nhật trạng thái đơn hàng',
-      'Đơn "'+o.product+'" đã chuyển từ "'+oldValue+'" sang "'+o[k]+'".'
-    );
-  }
-
-  save();
-  render();
-}
-
-function delOrder(id){state.orders=state.orders.filter(x=>x.id!==id);save();render()}
-function renderWithdrawals(){
-  const a=state.withdrawals.slice().sort((x,y)=>new Date(y.createdAt||0)-new Date(x.createdAt||0));
-  $('#withdrawList').innerHTML=a.length?a.map(w=>{
-    const ac=(state.accounts||[]).find(x=>x.id===w.userId);
-    const b=bankByName(w.bank);
-    return `<div class="ticket withdraw-card" onclick="openWithdrawDetail('${w.id}')">
-      <div class="row" style="justify-content:space-between">
-        <div class="row">${bankLogoHtml(b,38)}<div><b>${esc(ac?.name||w.userId)}</b><div class="tiny">${esc(w.bank)}</div></div></div>
-        <div style="text-align:right"><b style="font-size:18px">${money(w.amount)}</b><div><span class="status ${statusClass(w.status)}">${esc(w.status)}</span></div></div>
-      </div>
-      <div class="tiny" style="margin-top:8px">Bấm để xem đầy đủ STK, chủ tài khoản và xác nhận chuyển tiền.</div>
-      ${w.status==='Từ chối'&&w.rejectReason?`<div class="tiny" style="margin-top:6px;color:var(--bad)">Lý do: ${esc(w.rejectReason)}</div>`:''}
-    </div>`;
-  }).join(''):'<p class="muted">Chưa có yêu cầu.</p>';
-}
-let activeWithdrawDetailId=null;
-function openWithdrawDetail(id){
-  const w=state.withdrawals.find(x=>x.id===id); if(!w)return;
-  activeWithdrawDetailId=id;
-  const ac=(state.accounts||[]).find(x=>x.id===w.userId);
-  const b=bankByName(w.bank);
-  $('#withdrawDetailContent').innerHTML=`
-    <div class="withdraw-big-amount">${money(w.amount)}</div>
-    <div class="bank-big">${bankLogoHtml(b,56)}<div><div class="tiny">Ngân hàng</div><b style="font-size:18px">${esc(w.bank)}</b><div class="tiny">${esc(b?.name||'')}</div></div></div>
-    <div class="withdraw-detail-grid">
-      <div class="card" style="box-shadow:none;padding:12px"><div class="tiny">User</div><b>${esc(ac?.name||w.userId)}</b><div class="tiny">${esc(ac?.username||w.userId)}</div></div>
-      <div class="card" style="box-shadow:none;padding:12px"><div class="tiny">Số tài khoản</div><b style="font-size:20px;letter-spacing:.03em">${esc(w.account)}</b></div>
-      <div class="card" style="box-shadow:none;padding:12px"><div class="tiny">Tên chủ tài khoản</div><b>${esc(w.holder||'')}</b></div>
-      <div class="card" style="box-shadow:none;padding:12px"><div class="tiny">Trạng thái</div><span class="status ${statusClass(w.status)}">${esc(w.status)}</span></div>
-    </div>`;
-  $('#withdrawDetailActions').innerHTML=w.status==='Đang chờ'
-    ? `<button class="btn ghost" onclick="closeWithdrawDetail()">Đóng</button>
-       <button class="btn ghost" style="color:var(--bad)" onclick="closeWithdrawDetail();rejectWd('${w.id}')">Từ chối</button>
-       <button class="btn primary" onclick="confirmPayFromDetail('${w.id}')">Đã chuyển khoản</button>`
-    : `<button class="btn ghost" onclick="closeWithdrawDetail()">Đóng</button>`;
-  $('#withdrawDetailModal').classList.remove('hidden');
-  $('#withdrawDetailModal').setAttribute('aria-hidden','false');
-}
-function closeWithdrawDetail(){
-  activeWithdrawDetailId=null;
-  $('#withdrawDetailModal').classList.add('hidden');
-  $('#withdrawDetailModal').setAttribute('aria-hidden','true');
-}
-function confirmPayFromDetail(id){
-  const w=state.withdrawals.find(x=>x.id===id); if(!w)return;
-  // Large detail modal itself is the review step; then perform.
-  closeWithdrawDetail();
-  payWd(id);
-}
-
-function payWd(id){
-  const w=state.withdrawals.find(x=>x.id===id);
-  if(!w || w.status!=='Đang chờ')return;
-  w.status='Đã trả';
-  w.paidAt=new Date().toISOString();
-  state.notifications.push({
-    id:'N'+Date.now(),
-    userId:w.userId,
-    title:'Rút tiền thành công',
-    message:'Admin đã chuyển '+money(w.amount)+' vào tài khoản '+w.bank+' • '+w.account+'.',
-    read:false,
-    createdAt:new Date().toISOString()
-  });
-  save();render();showToast('Đã đánh dấu chuyển khoản thành công.');
-}
-let pendingRejectWithdrawId=null;
-
-function rejectWd(id){
-  const w=state.withdrawals.find(x=>x.id===id);
-  if(!w || w.status!=='Đang chờ'){
-    showToast('Yêu cầu rút tiền không còn ở trạng thái chờ.');
-    return;
-  }
-
-  pendingRejectWithdrawId=id;
-  $('#withdrawRejectReason').value='';
-  $('#withdrawRejectSummary').innerHTML=
-    '<b>Số tiền:</b> '+money(w.amount)+'<br>'+
-    '<b>Ngân hàng:</b> '+esc(w.bank)+'<br>'+
-    '<b>Số tài khoản:</b> '+esc(w.account)+'<br>'+
-    '<b>Chủ tài khoản:</b> '+esc(w.holder||'');
-
-  $('#withdrawRejectModal').classList.remove('hidden');
-  $('#withdrawRejectModal').setAttribute('aria-hidden','false');
-}
-
-function closeWithdrawRejectModal(){
-  pendingRejectWithdrawId=null;
-  $('#withdrawRejectModal').classList.add('hidden');
-  $('#withdrawRejectModal').setAttribute('aria-hidden','true');
-  $('#withdrawRejectReason').value='';
-}
-
-function confirmRejectWithdraw(){
-  if(!pendingRejectWithdrawId)return;
-
-  const w=state.withdrawals.find(x=>x.id===pendingRejectWithdrawId);
-  if(!w || w.status!=='Đang chờ'){
-    closeWithdrawRejectModal();
-    showToast('Yêu cầu rút tiền không còn ở trạng thái chờ.');
-    return;
-  }
-
-  const reason=$('#withdrawRejectReason').value.trim();
-  w.status='Từ chối';
-  w.rejectedAt=new Date().toISOString();
-  w.rejectReason=reason;
-
-  const msg=reason
-    ? 'Yêu cầu rút '+money(w.amount)+' đã bị từ chối. Lý do: '+reason+' Số tiền đã được trả lại vào số dư khả dụng.'
-    : 'Yêu cầu rút '+money(w.amount)+' đã bị từ chối. Số tiền đã được trả lại vào số dư khả dụng.';
-
-  state.notifications.push({
-    id:'N'+Date.now(),
-    userId:w.userId,
-    title:'Yêu cầu rút tiền bị từ chối',
-    message:msg,
-    read:false,
-    createdAt:new Date().toISOString()
-  });
-
-  closeWithdrawRejectModal();
-  save();
-  render();
-  showToast('Đã từ chối yêu cầu rút tiền.');
-}
-
-function sendNotif(){const t=$('#nTitle').value.trim(),m=$('#nMsg').value.trim();if(!t||!m)return alert('Nhập tiêu đề và nội dung.');notify(t,m);save();$('#nTitle').value='';$('#nMsg').value='';render();alert('Đã gửi thông báo sang User UI.')}
-function renderTickets(){const a=state.tickets.slice().reverse();$('#ticketCount').textContent=a.filter(t=>t.status==='Đang chờ').length+' ticket mới';$('#ticketAdmin').innerHTML=a.length?a.map(t=>`<div class="ticket"><div class="row" style="justify-content:space-between"><div><b>${esc(t.title)}</b><div class="tiny">${esc(t.userName)} • ${esc(t.category)} • ${new Date(t.createdAt).toLocaleString('vi-VN')}</div></div><span class="status ${statusClass(t.status)}">${esc(t.status)}</span></div><div class="muted" style="margin-top:8px">${esc(t.message)}</div>${t.reply?`<div class="reply"><b>Đã phản hồi:</b><br>${esc(t.reply)}</div>`:`<div class="field" style="margin-top:8px"><textarea id="rp_${t.id}" placeholder="Phản hồi user..."></textarea></div><button class="btn primary" style="margin-top:7px" onclick="replyTicket('${t.id}')">Gửi phản hồi</button>`}</div>`).join(''):'<p class="muted">Chưa có ticket.</p>'}
-function replyTicket(id){const t=state.tickets.find(x=>x.id===id),v=$('#rp_'+id)?.value.trim();if(!t||!v)return;t.reply=v;t.status='Đã phản hồi';t.repliedAt=new Date().toISOString();notify('Support đã phản hồi','Admin đã phản hồi ticket "'+t.title+'".');save();render()}
-
-
-const withdrawRejectModalEl=$('#withdrawRejectModal');
-if(withdrawRejectModalEl){
-  withdrawRejectModalEl.addEventListener('click',e=>{
-    if(e.target===withdrawRejectModalEl)closeWithdrawRejectModal();
-  });
-}
-
-const accountModalEl=$('#accountModal');
-if(accountModalEl){
-  accountModalEl.addEventListener('click',e=>{
-    if(e.target===accountModalEl)closeAccountModal();
-  });
-}
-document.addEventListener('keydown',e=>{
-  if(e.key!=='Escape')return;
-  if(!$('#withdrawDetailModal').classList.contains('hidden'))closeWithdrawDetail();
-  else if(!$('#withdrawRejectModal').classList.contains('hidden'))closeWithdrawRejectModal();
-  else if(!$('#accountModal').classList.contains('hidden'))closeAccountModal();
-});
-loadBanks();
-render();
-</script></body></html>
+(async()=>{
+  const a=await requireAdmin();
+  if(a)await showApp(a);
+})();
+</script>
+</body>
+</html>

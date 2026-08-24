@@ -251,7 +251,7 @@ async function getOwnProfile(userId){
   for(let i=0;i<6;i++){
     const {data,error}=await sb
       .from('profiles')
-      .select('id,username,display_name,role,is_locked,created_at')
+      .select('id,username,display_name,role,is_locked,tracking_code,created_at')
       .eq('id',userId)
       .maybeSingle();
     if(!error && data)return data;
@@ -275,7 +275,8 @@ async function setSignedInUser(authUser){
     name:profile.display_name||profile.username,
     username:profile.username,
     email:'',
-    role:profile.role||'user'
+    role:profile.role||'user',
+    trackingCode:profile.tracking_code||profile.id
   };
   save();
   return state.user;
@@ -815,7 +816,7 @@ async function updateShopeePreview(){
 }
 
 function getProductionSubId(){
-  const raw=(state&&state.user&&state.user.id)?String(state.user.id):'guest';
+  const raw=(state&&state.user&&(state.user.trackingCode||state.user.id))?String(state.user.trackingCode||state.user.id):'guest';
   return raw.replace(/[^A-Za-z0-9_-]/g,'').slice(0,60)||'guest';
 }
 
