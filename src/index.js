@@ -2,6 +2,7 @@ const ALLOWED_INPUT_HOSTS = new Set([
   "s.shopee.vn",
   "shopee.vn",
   "www.shopee.vn",
+  "vn.shp.ee",
 ]);
 
 function json(data, status = 200) {
@@ -364,6 +365,8 @@ async function resolveShopee(requestUrl) {
           host !== "s.shopee.vn"
           &&
           host !== "shopee.vn"
+          && 
+          host !== "vn.shp.ee"
         ) {
 
           return json(
