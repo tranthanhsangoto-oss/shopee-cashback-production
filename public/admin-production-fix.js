@@ -56,10 +56,24 @@
     }
   }
 
-  // Save tier changes into Supabase instead of only localStorage.
+  // Pending purchase intents are reconciliation helpers only, not real orders.
+  try{
+    if(typeof syncSupabaseAccounts==='function'){
+      const originalSyncSupabaseAccounts=syncSupabaseAccounts;
+      syncSupabaseAccounts=async function(){
+        await originalSyncSupabaseAccounts();
+        if(Array.isArray(state?.orders)){
+          state.orders=state.orders.filter(o=>o?.source!=='intent' && !String(o?.id||'').startsWith('WAIT-'));
+          save();
+          if(typeof renderOrders==='function')renderOrders();
+          if(typeof renderUserTracking==='function')renderUserTracking();
+        }
+      };
+    }
+  }catch(e){console.warn(e)}
+
   try{
     if(typeof saveSettings==='function'){
-      const legacySaveSettings=saveSettings;
       saveSettings=async function(){
         const thresholds={
           bronze:Number(q('#tBronze')?.value||0), silver:Number(q('#tSilver')?.value||0),
@@ -94,17 +108,12 @@
     }
   }catch(e){console.warn(e)}
 
-  // Persist edits of real Shopee orders to Supabase.
   try{
     if(typeof editOrder==='function'){
       const legacyEditOrder=editOrder;
       editOrder=async function(id,k,v){
         const o=state.orders.find(x=>x.id===id);
         if(!o)return;
-        if(o.source==='intent'||String(id).startsWith('WAIT-')){
-          alert('Đơn đang chờ đối soát chỉ được cập nhật khi import báo cáo Shopee.');
-          await syncSupabaseAccounts(); return;
-        }
         legacyEditOrder(id,k,v);
         const changed=state.orders.find(x=>x.id===id);
         if(!changed)return;
