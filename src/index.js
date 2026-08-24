@@ -260,6 +260,31 @@ async function resolveShopee(requestUrl) {
   }
 }
 
+async function injectRuntimePatch(request, env, patchPath) {
+  const assetResponse = await env.ASSETS.fetch(request);
+  if (!assetResponse.ok) return assetResponse;
+
+  const contentType = assetResponse.headers.get("content-type") || "";
+  if (!contentType.includes("text/html")) return assetResponse;
+
+  let html = await assetResponse.text();
+  const scriptTag = `<script src="${patchPath}?v=20260824-1"></script>`;
+  if (!html.includes(scriptTag)) {
+    html = html.includes("</body>")
+      ? html.replace("</body>", `${scriptTag}</body>`)
+      : html + scriptTag;
+  }
+
+  const headers = new Headers(assetResponse.headers);
+  headers.delete("content-length");
+  headers.set("cache-control", "no-store");
+  return new Response(html, {
+    status: assetResponse.status,
+    statusText: assetResponse.statusText,
+    headers,
+  });
+}
+
 export default {
   async fetch(request, env) {
     const url = new URL(request.url);
@@ -273,6 +298,15 @@ export default {
       }
 
       return resolveShopee(url);
+    }
+
+    if (request.method === "GET" || request.method === "HEAD") {
+      if (url.pathname === "/" || url.pathname === "/index.html") {
+        return injectRuntimePatch(request, env, "/user-production-fix.js");
+      }
+      if (url.pathname === "/admin" || url.pathname === "/admin/" || url.pathname === "/admin.html") {
+        return injectRuntimePatch(request, env, "/admin-production-fix.js");
+      }
     }
 
     return env.ASSETS.fetch(request);
