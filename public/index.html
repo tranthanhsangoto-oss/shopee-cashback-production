@@ -712,13 +712,16 @@ function cleanShopeeProductUrl(raw){
   return {ok:false,reason:'not_shopee'};
 }
 
-  if(host==='s.shopee.vn'){
-    return {
-      ok:true,
-      short:true,
-      cleanUrl:url.origin+url.pathname
-    };
-  }
+  if(
+  host==='s.shopee.vn' ||
+  host==='vn.shp.ee'
+){
+  return {
+    ok:true,
+    short:true,
+    cleanUrl:url.origin+url.pathname
+  };
+}
 
   const path=decodeURIComponent(url.pathname);
   let shopId='',itemId='',m;
