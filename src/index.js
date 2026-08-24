@@ -206,10 +206,7 @@ async function resolveShopee(requestUrl) {
           });
         }
 
-        const host =
-          currentUrl.hostname
-            .toLowerCase()
-            .replace(/^www\./, "");
+        const host = currentUrl.hostname.toLowerCase().replace(/^www\./, "");
 
         if (
           host !== "s.shopee.vn" &&
@@ -247,16 +244,9 @@ async function resolveShopee(requestUrl) {
       }, 422);
     }
 
-    return json({
-      ok:false,
-      error:"too_many_redirects",
-    }, 400);
-
+    return json({ ok:false, error:"too_many_redirects" }, 400);
   } catch {
-    return json({
-      ok:false,
-      error:"resolve_failed",
-    }, 502);
+    return json({ ok:false, error:"resolve_failed" }, 502);
   }
 }
 
@@ -269,24 +259,17 @@ async function injectRuntimePatch(request, env, patchPath) {
 
   let html = await assetResponse.text();
 
-  // User and Admin live on the same origin. Supabase's default auth storage key
-  // would make both pages share and overwrite the same browser session.
-  // Give each app its own persistent session namespace.
-  if (patchPath === "/user-production-fix.js") {
-    html = html.replace(
-      "const sb=window.supabase.createClient(SUPABASE_URL,SUPABASE_PUBLISHABLE_KEY);",
-      "const sb=window.supabase.createClient(SUPABASE_URL,SUPABASE_PUBLISHABLE_KEY,{auth:{storageKey:'shopee-cashback-user-auth'}});"
-    );
-  }
-
+  // Keep User on Supabase's default persistent auth storage so existing user
+  // sessions survive reloads. Admin gets a separate storage namespace so the
+  // two apps on the same origin cannot sign each other out.
   if (patchPath === "/admin-production-fix.js") {
     html = html.replace(
       "const prodSb=window.supabase.createClient(PROD_SUPABASE_URL,PROD_SUPABASE_KEY);",
-      "const prodSb=window.supabase.createClient(PROD_SUPABASE_URL,PROD_SUPABASE_KEY,{auth:{storageKey:'shopee-cashback-admin-auth'}});"
+      "const prodSb=window.supabase.createClient(PROD_SUPABASE_URL,PROD_SUPABASE_KEY,{auth:{storageKey:'shopee-cashback-admin-auth',persistSession:true,autoRefreshToken:true}});"
     );
   }
 
-  const scriptTag = `<script src="${patchPath}?v=20260824-2"></script>`;
+  const scriptTag = `<script src="${patchPath}?v=20260824-3"></script>`;
   if (!html.includes(scriptTag)) {
     html = html.includes("</body>")
       ? html.replace("</body>", `${scriptTag}</body>`)
@@ -309,12 +292,8 @@ export default {
 
     if (url.pathname === "/api/resolve-shopee") {
       if (request.method !== "GET") {
-        return json({
-          ok:false,
-          error:"method_not_allowed",
-        }, 405);
+        return json({ ok:false, error:"method_not_allowed" }, 405);
       }
-
       return resolveShopee(url);
     }
 
