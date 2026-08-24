@@ -62,6 +62,19 @@ p{color:var(--muted);line-height:1.6}.muted{color:var(--muted);font-size:13px}.t
 .product{display:grid;grid-template-columns:120px 1fr;gap:14px;align-items:center}.productimg{width:120px;height:120px;border-radius:16px;background:#fff0eb;display:grid;place-items:center;font-size:34px}
 .howto{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}.step{border:1px solid var(--line);background:#fff;border-radius:16px;padding:12px}.ph{height:86px;border:1px dashed #efb9aa;border-radius:12px;background:#fff7f4;display:grid;place-items:center;color:#a36656;font-size:11px;text-align:center;padding:8px}.num{margin-top:10px;width:26px;height:26px;border-radius:8px;background:#fff0ec;color:var(--brand);display:grid;place-items:center;font-weight:900;font-size:11px}
 @media(max-width:760px){.grid,.grid3{grid-template-columns:1fr}.howto{grid-template-columns:1fr 1fr}.product{grid-template-columns:90px 1fr}.productimg{width:90px;height:90px}.topbar{padding:11px 12px}.page{padding:15px 12px}.stat .val{font-size:25px}}
+.ph{
+  height:180px;
+  border-radius:12px;
+  overflow:hidden;
+  background:#fff7f4;
+}
+
+.ph img{
+  width:100%;
+  height:100%;
+  object-fit:contain;
+  display:block;
+}
 </style><script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body>
@@ -150,10 +163,10 @@ p{color:var(--muted);line-height:1.6}.muted{color:var(--muted);font-size:13px}.t
 
   <div style="margin-top:15px"><div class="eyebrow">Cách nhận hoàn tiền</div><h2 style="margin-top:3px">Chỉ 4 bước đơn giản</h2></div>
   <div class="howto">
-    <div class="step"><div class="ph">Ảnh bước 1<br>thay sau</div><div class="num">1</div><b>Copy link sản phẩm</b><div class="tiny" style="margin-top:5px">Sao chép link sản phẩm trên Shopee.</div></div>
-    <div class="step"><div class="ph">Ảnh bước 2<br>thay sau</div><div class="num">2</div><b>Dán link vào đây</b><div class="tiny" style="margin-top:5px">Web tự tạo link hoàn tiền.</div></div>
-    <div class="step"><div class="ph">Ảnh bước 3<br>thay sau</div><div class="num">3</div><b>Bấm mua ngay</b><div class="tiny" style="margin-top:5px">Quay lại Shopee từ link vừa tạo.</div></div>
-    <div class="step"><div class="ph">Ảnh bước 4<br>thay sau</div><div class="num">4</div><b>Mua hàng bình thường</b><div class="tiny" style="margin-top:5px">Đặt hàng trên Shopee như bình thường.</div></div>
+    <div class="step"><div class="ph"><img src="/images/step-1.jpg" alt="Bước 1"></div><div class="num">1</div><b>Copy link sản phẩm</b><div class="tiny" style="margin-top:5px">Sao chép link sản phẩm trên Shopee.</div></div>
+    <div class="step"><div class="ph"><img src="/images/step-2.jpg" alt="Bước 2"></div><div class="num">2</div><b>Dán link vào đây</b><div class="tiny" style="margin-top:5px">Web tự tạo link hoàn tiền.</div></div>
+    <div class="step"><div class="ph"><img src="/images/step-3.jpg" alt="Bước 3"></div><div class="num">3</div><b>Bấm mua ngay</b><div class="tiny" style="margin-top:5px">Quay lại Shopee từ link vừa tạo.</div></div>
+    <div class="step"><div class="ph"><img src="/images/step-4.jpg" alt="Bước 4"></div><div class="num">4</div><b>Mua hàng bình thường</b><div class="tiny" style="margin-top:5px">Đặt hàng trên Shopee như bình thường.</div></div>
   </div>
   <div class="note" style="margin-top:11px"><b>⚠ Lưu ý để được ghi nhận hoàn tiền</b><br><b>Không thêm sản phẩm muốn mua vào giỏ hàng trước khi tạo link hoàn tiền.</b> Sau khi bấm <b>“Mua ngay & nhận hoàn tiền”</b>, hãy mua sản phẩm hoặc thêm sản phẩm vào giỏ hàng từ chính link vừa mở trên Shopee. Thực hiện sai bước có thể không được ghi nhận cashback.</div>
 
