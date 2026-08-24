@@ -62,23 +62,6 @@ p{color:var(--muted);line-height:1.6}.muted{color:var(--muted);font-size:13px}.t
 .product{display:grid;grid-template-columns:120px 1fr;gap:14px;align-items:center}.productimg{width:120px;height:120px;border-radius:16px;background:#fff0eb;display:grid;place-items:center;font-size:34px}
 .howto{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}.step{border:1px solid var(--line);background:#fff;border-radius:16px;padding:12px}.ph{height:86px;border:1px dashed #efb9aa;border-radius:12px;background:#fff7f4;display:grid;place-items:center;color:#a36656;font-size:11px;text-align:center;padding:8px}.num{margin-top:10px;width:26px;height:26px;border-radius:8px;background:#fff0ec;color:var(--brand);display:grid;place-items:center;font-weight:900;font-size:11px}
 @media(max-width:760px){.grid,.grid3{grid-template-columns:1fr}.howto{grid-template-columns:1fr 1fr}.product{grid-template-columns:90px 1fr}.productimg{width:90px;height:90px}.topbar{padding:11px 12px}.page{padding:15px 12px}.stat .val{font-size:25px}}
-.ph{
-  height:180px;
-  border-radius:12px;
-  overflow:hidden;
-  background:#fff7f4;
-
-  display:flex;
-  align-items:flex-end;
-  justify-content:center;
-}
-.ph img{
-  width:100%;
-  height:auto;
-  max-height:100%;
-  object-fit:contain;
-  display:block;
-}
 </style><script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body>
@@ -167,10 +150,10 @@ p{color:var(--muted);line-height:1.6}.muted{color:var(--muted);font-size:13px}.t
 
   <div style="margin-top:15px"><div class="eyebrow">Cách nhận hoàn tiền</div><h2 style="margin-top:3px">Chỉ 4 bước đơn giản</h2></div>
   <div class="howto">
-    <div class="step"><div class="ph"><img src="/images/step-1.jpg" alt="Bước 1"></div><div class="num">1</div><b>Copy link sản phẩm</b><div class="tiny" style="margin-top:5px">Sao chép link sản phẩm trên Shopee.</div></div>
-    <div class="step"><div class="ph"><img src="/images/step-2.jpg" alt="Bước 2"></div><div class="num">2</div><b>Dán link vào đây</b><div class="tiny" style="margin-top:5px">Web tự tạo link hoàn tiền.</div></div>
-    <div class="step"><div class="ph"><img src="/images/step-3.jpg" alt="Bước 3"></div><div class="num">3</div><b>Bấm mua ngay</b><div class="tiny" style="margin-top:5px">Quay lại Shopee từ link vừa tạo.</div></div>
-    <div class="step"><div class="ph"><img src="/images/step-4.jpg" alt="Bước 4"></div><div class="num">4</div><b>Mua hàng bình thường</b><div class="tiny" style="margin-top:5px">Đặt hàng trên Shopee như bình thường.</div></div>
+    <div class="step"><div class="ph">Ảnh bước 1<br>thay sau</div><div class="num">1</div><b>Copy link sản phẩm</b><div class="tiny" style="margin-top:5px">Sao chép link sản phẩm trên Shopee.</div></div>
+    <div class="step"><div class="ph">Ảnh bước 2<br>thay sau</div><div class="num">2</div><b>Dán link vào đây</b><div class="tiny" style="margin-top:5px">Web tự tạo link hoàn tiền.</div></div>
+    <div class="step"><div class="ph">Ảnh bước 3<br>thay sau</div><div class="num">3</div><b>Bấm mua ngay</b><div class="tiny" style="margin-top:5px">Quay lại Shopee từ link vừa tạo.</div></div>
+    <div class="step"><div class="ph">Ảnh bước 4<br>thay sau</div><div class="num">4</div><b>Mua hàng bình thường</b><div class="tiny" style="margin-top:5px">Đặt hàng trên Shopee như bình thường.</div></div>
   </div>
   <div class="note" style="margin-top:11px"><b>⚠ Lưu ý để được ghi nhận hoàn tiền</b><br><b>Không thêm sản phẩm muốn mua vào giỏ hàng trước khi tạo link hoàn tiền.</b> Sau khi bấm <b>“Mua ngay & nhận hoàn tiền”</b>, hãy mua sản phẩm hoặc thêm sản phẩm vào giỏ hàng từ chính link vừa mở trên Shopee. Thực hiện sai bước có thể không được ghi nhận cashback.</div>
 
@@ -299,6 +282,113 @@ async function setSignedInUser(authUser){
   return state.user;
 }
 
+function prodOrderStatus(normalized, raw){
+  if(raw)return raw;
+  if(normalized==='confirmed')return 'Hoàn thành';
+  if(normalized==='invalid')return 'Không hợp lệ';
+  return 'Đang xử lý';
+}
+function prodCommissionStatus(normalized, raw){
+  if(normalized==='confirmed')return 'Đã xác nhận';
+  if(normalized==='invalid')return 'Không hợp lệ';
+  return raw || 'Đang chờ';
+}
+
+async function loadProductionCommerceData(){
+  if(!state.user?.id)return;
+  const uid=state.user.id;
+  const [ordersRes,intentsRes,tiersRes]=await Promise.all([
+    sb.from('orders')
+      .select('order_id,user_id,sub_id,product_name,order_value,shopee_commission,cashback_amount,order_status,commission_status,normalized_status,ordered_at,source_imported_at,updated_at')
+      .eq('user_id',uid).order('updated_at',{ascending:false}),
+    sb.from('purchase_intents')
+      .select('id,user_id,tracking_code,original_url,clean_url,shop_id,item_id,status,matched_order_id,created_at,reconciled_at')
+      .eq('user_id',uid).eq('status','awaiting_reconciliation').order('created_at',{ascending:false}),
+    sb.from('cashback_tiers').select('*').order('sort_order')
+  ]);
+
+  if(!ordersRes.error){
+    const real=(ordersRes.data||[]).map(o=>({
+      id:o.order_id,userId:o.user_id,
+      product:o.product_name||'Sản phẩm Shopee',
+      orderValue:Number(o.order_value||0),
+      commission:Number(o.shopee_commission||0),
+      cashback:Number(o.cashback_amount||0),
+      orderStatus:prodOrderStatus(o.normalized_status,o.order_status),
+      commissionStatus:prodCommissionStatus(o.normalized_status,o.commission_status),
+      createdAt:o.ordered_at||o.source_imported_at||o.updated_at,
+      source:'shopee',isIntent:false
+    }));
+    const intents=!intentsRes.error?(intentsRes.data||[]).map(i=>({
+      id:'WAIT-'+i.id,intentId:i.id,userId:i.user_id,
+      product:'Lượt mua Shopee đang chờ đối soát',
+      orderValue:0,commission:0,cashback:0,
+      orderStatus:'Chờ xử lý',commissionStatus:'Chờ đối soát',
+      createdAt:i.created_at,source:'intent',isIntent:true,
+      originalUrl:i.original_url||'',cleanUrl:i.clean_url||''
+    })):[];
+    state.orders=[...real,...intents];
+  }
+
+  if(!tiersRes.error && tiersRes.data?.length){
+    for(const row of tiersRes.data){
+      const k=row.tier_key;
+      if(!['bronze','silver','gold','platinum','diamond'].includes(k))continue;
+      state.settings.tierThresholds[k]=Number(row.min_confirmed_cashback||0);
+      state.settings.tierRates[k]=Math.round(Number(row.cashback_rate||0)*100);
+    }
+  }
+  save();
+}
+
+async function trackShopeeEvent(eventType,data={}){
+  if(!state.user?.id)return null;
+  const payload={
+    user_id:state.user.id,
+    tracking_code:getProductionSubId(),
+    event_type:eventType,
+    original_url:data.originalUrl||'',
+    clean_url:data.cleanUrl||'',
+    affiliate_url:data.affiliateUrl||'',
+    shop_id:data.shopId||'',
+    item_id:data.itemId||''
+  };
+  const {data:row,error}=await sb.from('tracking_events').insert(payload).select('id').single();
+  if(error){console.warn('tracking event failed',error);return null}
+  return row;
+}
+
+let lastTrackedPaste='',lastTrackedPasteAt=0;
+async function trackPastedShopeeLink(){
+  const raw=$('#shopLink')?.value?.trim()||'';
+  const parsed=cleanShopeeProductUrl(raw);
+  if(!parsed.ok)return;
+  const now=Date.now();
+  if(raw===lastTrackedPaste && now-lastTrackedPasteAt<10000)return;
+  lastTrackedPaste=raw;lastTrackedPasteAt=now;
+  await trackShopeeEvent('paste_link',{
+    originalUrl:raw,cleanUrl:parsed.cleanUrl||raw,
+    shopId:parsed.shopId||'',itemId:parsed.itemId||''
+  });
+}
+
+async function createPendingPurchaseIntent(data){
+  if(!state.user?.id)throw new Error('not_signed_in');
+  const payload={
+    user_id:state.user.id,
+    tracking_code:getProductionSubId(),
+    original_url:data.originalUrl||'',
+    clean_url:data.cleanUrl||'',
+    affiliate_url:data.affiliateUrl||'',
+    shop_id:data.shopId||'',
+    item_id:data.itemId||'',
+    status:'awaiting_reconciliation'
+  };
+  const {data:row,error}=await sb.from('purchase_intents').insert(payload).select('*').single();
+  if(error)throw error;
+  return row;
+}
+
 const $=s=>document.querySelector(s);
 const money=n=>new Intl.NumberFormat('vi-VN').format(Number(n||0))+'đ';
 const esc=s=>String(s??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m]));
@@ -394,6 +484,7 @@ async function showAuthState(){
 
   try{
     await setSignedInUser(session.user);
+    await loadProductionCommerceData();
     $('#loginScreen').classList.add('hidden');
     $('#appRoot').classList.remove('hidden');
     render();
@@ -567,12 +658,22 @@ function render(){const b=balances();$('#who').textContent=state.user.name;$('#a
     $('#tierRemaining').textContent='Tiếp tục mua sắm để duy trì quyền lợi Kim Cương';
   }
   renderOrders();renderWithdrawals();loadSavedBankInfo();validateWithdrawAmount();renderTickets();renderNotif()}
-function renderOrders(){const arr=state.orders.filter(o=>o.userId===state.user.id).slice().sort((a,b)=>new Date(b.createdAt||0)-new Date(a.createdAt||0));$('#ordersList').innerHTML=arr.length?arr.map(o=>`<div class="order"><div class="thumb">🛍️</div><div><b>${esc(o.product)}</b><div class="muted">Giá trị đơn: ${money(o.orderValue)}</div><div style="margin-top:5px"><span class="status ${statusClass(o.orderStatus)}">${esc(o.orderStatus)}</span> <span class="status ${statusClass(o.commissionStatus)}">${esc(o.commissionStatus)}</span></div>${statusClass(o.commissionStatus)==='s-pending'?'<div class="tiny" style="margin-top:7px;color:#8a6618">Cashback sẽ được rà soát và cập nhật trong khoảng 3–5 ngày kể từ khi đơn được xác nhận đã nhận hàng.</div>':''}</div><div class="amount">
-  <div class="tiny" style="margin-bottom:4px">Bạn nhận được</div>
-  <div style="color:${statusClass(o.commissionStatus)==='s-bad'?'var(--bad)':'var(--ok)'}">
-    ${statusClass(o.commissionStatus)==='s-bad'?'0đ':'+'+money(o.cashback)}
-  </div>
-</div></div>`).join(''):'<p class="muted">Chưa có đơn.</p>'}
+function renderOrders(){
+  const arr=state.orders.filter(o=>o.userId===state.user.id).slice().sort((a,b)=>new Date(b.createdAt||0)-new Date(a.createdAt||0));
+  $('#ordersList').innerHTML=arr.length?arr.map(o=>{
+    const intentNote=o.isIntent
+      ? '<div class="tiny" style="margin-top:7px;color:#8a6618">Bạn đã mở Shopee từ link hoàn tiền. Hệ thống đang chờ Báo cáo chuyển đổi của Shopee để xác nhận đơn, giá trị và cashback.</div>'
+      : (statusClass(o.commissionStatus)==='s-pending'
+        ? '<div class="tiny" style="margin-top:7px;color:#8a6618">Cashback sẽ được rà soát và cập nhật trong khoảng 3–5 ngày kể từ khi đơn được xác nhận đã nhận hàng.</div>'
+        : '');
+    const valueText=o.isIntent?'Chưa có dữ liệu Shopee':('Giá trị đơn: '+money(o.orderValue));
+    const cashText=o.isIntent?'Đang xác minh':(statusClass(o.commissionStatus)==='s-bad'?'0đ':'+'+money(o.cashback));
+    return `<div class="order"><div class="thumb">🛍️</div><div><b>${esc(o.product)}</b><div class="muted">${valueText}</div><div style="margin-top:5px"><span class="status ${statusClass(o.orderStatus)}">${esc(o.orderStatus)}</span> <span class="status ${statusClass(o.commissionStatus)}">${esc(o.commissionStatus)}</span></div>${intentNote}</div><div class="amount">
+      <div class="tiny" style="margin-bottom:4px">Bạn nhận được</div>
+      <div style="color:${o.isIntent?'var(--muted)':(statusClass(o.commissionStatus)==='s-bad'?'var(--bad)':'var(--ok)')}">${cashText}</div>
+    </div></div>`;
+  }).join(''):'<p class="muted">Chưa có đơn.</p>';
+}
 
 
 function renderBankOptions(){
@@ -704,24 +805,17 @@ function cleanShopeeProductUrl(raw){
 
   const host=url.hostname.toLowerCase().replace(/^www\./,'');
 
-  if(
-  host!=='shopee.vn' &&
-  host!=='s.shopee.vn' &&
-  host!=='vn.shp.ee'
-){
-  return {ok:false,reason:'not_shopee'};
-}
+  if(host!=='shopee.vn' && host!=='s.shopee.vn' && host!=='vn.shp.ee'){
+    return {ok:false,reason:'not_shopee'};
+  }
 
-  if(
-  host==='s.shopee.vn' ||
-  host==='vn.shp.ee'
-){
-  return {
-    ok:true,
-    short:true,
-    cleanUrl:url.origin+url.pathname
-  };
-}
+  if(host==='s.shopee.vn' || host==='vn.shp.ee'){
+    return {
+      ok:true,
+      short:true,
+      cleanUrl:url.origin+url.pathname
+    };
+  }
 
   const path=decodeURIComponent(url.pathname);
   let shopId='',itemId='',m;
@@ -872,22 +966,18 @@ async function buyNow(){
       +'&affiliate_id='+encodeURIComponent(AFFILIATE_ID)
       +'&sub_id='+encodeURIComponent(subId+'----');
 
-    // Keep a local click record only as a temporary frontend record.
-    // Production backend should persist this server-side once enabled.
-    if(state&&state.clicks){
-      state.clicks.push({
-        id:'C'+Date.now(),
-        userId:state.user&&state.user.id,
-        originalUrl:raw,
-        cleanUrl,
-        affiliateUrl,
-        subId,
-        shopId:result.shopId||'',
-        itemId:result.itemId||'',
-        createdAt:new Date().toISOString()
-      });
-      try{save()}catch(e){}
-    }
+    await trackShopeeEvent('open_shopee',{
+      originalUrl:raw,cleanUrl,affiliateUrl,
+      shopId:result.shopId||'',itemId:result.itemId||''
+    });
+
+    await createPendingPurchaseIntent({
+      originalUrl:raw,cleanUrl,affiliateUrl,
+      shopId:result.shopId||'',itemId:result.itemId||''
+    });
+
+    await loadProductionCommerceData();
+    render();
 
     if(newTab){
       newTab.location.href=affiliateUrl;
@@ -903,7 +993,7 @@ async function buyNow(){
 }
 
 $('#shopLink').addEventListener('input',updateShopeePreview);
-$('#shopLink').addEventListener('paste',()=>setTimeout(updateShopeePreview,0));
+$('#shopLink').addEventListener('paste',()=>setTimeout(()=>{updateShopeePreview();trackPastedShopeeLink();},0));
 
 document.addEventListener('click',e=>{
   if(!e.target.closest('.bank-picker') && $('#bankResults'))$('#bankResults').classList.add('hidden');

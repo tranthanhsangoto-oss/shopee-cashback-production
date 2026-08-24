@@ -192,6 +192,18 @@ p{color:var(--muted);line-height:1.6}.muted{color:var(--muted);font-size:13px}.t
     <div id="userTrackingList" style="margin-top:10px"></div>
   </div>
 
+  <div class="card" style="margin-top:14px">
+    <div class="row" style="justify-content:space-between;align-items:flex-start">
+      <div>
+        <div class="eyebrow">Tracking Activity</div>
+        <h2 style="margin-top:3px">Dán link & mở Shopee</h2>
+        <div class="tiny">Dữ liệu thật từ Supabase.</div>
+      </div>
+      <div id="trackingActivityCount" class="status s-info">0 lượt</div>
+    </div>
+    <div id="trackingActivityList" style="margin-top:10px"></div>
+  </div>
+
   <div class="grid" style="margin-top:14px">
     <div class="card"><h2>User DEV</h2><div class="field"><label>Tên</label><input id="uName"></div><button class="btn primary" style="margin-top:9px" onclick="saveUser()">Lưu user</button></div>
     <div class="card"><h2>Hạng & quy tắc</h2>
@@ -345,9 +357,54 @@ async function syncSupabaseAccounts(){
     const remoteIds=new Set(remote.map(a=>a.supabaseId));
     const localOnly=(state.accounts||[]).filter(a=>!a.supabaseId && !remote.some(r=>r.username===a.username));
     state.accounts=[...remote,...localOnly];
+
+    const profileByUuid=new Map((data||[]).map(p=>[p.id,p]));
+    const [ordersRes,intentsRes,eventsRes]=await Promise.all([
+      prodSb.from('orders').select('*').order('updated_at',{ascending:false}).limit(1000),
+      prodSb.from('purchase_intents').select('*').eq('status','awaiting_reconciliation').order('created_at',{ascending:false}).limit(500),
+      prodSb.from('tracking_events').select('*').order('created_at',{ascending:false}).limit(500)
+    ]);
+
+    const remoteOrders=!ordersRes.error?(ordersRes.data||[]).map(o=>{
+      const p=profileByUuid.get(o.user_id);
+      const normalized=o.normalized_status||'pending';
+      return {
+        id:o.order_id,userId:p?.tracking_code||o.user_id,supabaseUserId:o.user_id,
+        product:o.product_name||'Sản phẩm Shopee',
+        orderValue:Number(o.order_value||0),commission:Number(o.shopee_commission||0),
+        cashback:Number(o.cashback_amount||0),
+        orderStatus:o.order_status||(normalized==='confirmed'?'Hoàn thành':normalized==='invalid'?'Không hợp lệ':'Đang xử lý'),
+        commissionStatus:normalized==='confirmed'?'Đã xác nhận':normalized==='invalid'?'Không hợp lệ':(o.commission_status||'Đang chờ'),
+        createdAt:o.ordered_at||o.source_imported_at||o.updated_at,source:'shopee'
+      };
+    }):[];
+
+    const pendingOrders=!intentsRes.error?(intentsRes.data||[]).map(i=>{
+      const p=profileByUuid.get(i.user_id);
+      return {
+        id:'WAIT-'+i.id,intentId:i.id,userId:p?.tracking_code||i.user_id,supabaseUserId:i.user_id,
+        product:'Lượt mua Shopee đang chờ đối soát',
+        orderValue:0,commission:0,cashback:0,
+        orderStatus:'Chờ xử lý',commissionStatus:'Chờ đối soát',
+        createdAt:i.created_at,source:'intent',originalUrl:i.original_url||''
+      };
+    }):[];
+
+    state.orders=[...remoteOrders,...pendingOrders];
+    state.clicks=!eventsRes.error?(eventsRes.data||[]).map(e=>{
+      const p=profileByUuid.get(e.user_id);
+      return {
+        id:e.id,userId:p?.tracking_code||e.user_id,supabaseUserId:e.user_id,
+        type:e.event_type,originalUrl:e.original_url||'',cleanUrl:e.clean_url||'',
+        affiliateUrl:e.affiliate_url||'',createdAt:e.created_at
+      };
+    }):[];
+
     save();
     renderAccounts();
     renderUserTracking();
+    renderOrders();
+    renderTrackingActivity();
     const el=$('#syncText');
     if(el)el.textContent='Supabase · '+new Date().toLocaleTimeString('vi-VN');
   }catch(e){
@@ -419,7 +476,10 @@ async function importShopeeReport(){
       const rate=await scCashbackRateForUser(p);
       const cashback=scInvalid(commissionStatus)?0:Math.round(commission*rate);
 
-      // Upsert to Supabase if orders table exists.
+      const {data:existingOrder}=await prodSb
+        .from('orders').select('order_id').eq('order_id',orderId).maybeSingle();
+
+      // Upsert to Supabase.
       const payload={
         order_id:orderId,user_id:p.id,sub_id:subId,product_name:product,
         order_value:orderValue,shopee_commission:commission,cashback_rate:rate,
@@ -430,6 +490,19 @@ async function importShopeeReport(){
       };
       const {error:oErr}=await prodSb.from('orders').upsert(payload,{onConflict:'order_id'});
       if(oErr)throw oErr;
+
+      if(!existingOrder){
+        const {data:pendingIntent,error:iFindErr}=await prodSb
+          .from('purchase_intents').select('id')
+          .eq('user_id',p.id).eq('status','awaiting_reconciliation')
+          .order('created_at',{ascending:true}).limit(1).maybeSingle();
+        if(!iFindErr && pendingIntent?.id){
+          const {error:iUpdErr}=await prodSb.from('purchase_intents').update({
+            status:'reconciled',matched_order_id:orderId,reconciled_at:new Date().toISOString()
+          }).eq('id',pendingIntent.id);
+          if(iUpdErr)console.warn('Could not reconcile purchase intent',iUpdErr);
+        }
+      }
 
       // Mirror into the existing Admin UI state so all old tracking/order screens keep working.
       const localId=p.tracking_code||p.id;
@@ -451,6 +524,7 @@ async function importShopeeReport(){
     }
 
     save();
+    await syncSupabaseAccounts();
     render();
     box.innerHTML='Đã đọc <b>'+rows.length+'</b> dòng · cập nhật <b>'+updated+
       '</b> đơn · không tìm thấy Sub ID <b>'+unmatched+'</b> · bỏ qua <b>'+skipped+'</b>.';
@@ -623,7 +697,7 @@ function renderUserTracking(){
     const tr=tier(s.confirmedCashback);
     const detail=s.orders.length?s.orders.slice().reverse().map(o=>`
       <div class="user-order-mini">
-        <div><b>${esc(o.product)}</b><div class="tiny">${new Date(o.createdAt).toLocaleDateString('vi-VN')}</div></div>
+        <div><b>${esc(o.product)}</b><div class="tiny">${new Date(o.createdAt).toLocaleDateString('vi-VN')}${o.source==='intent'?' · chờ Shopee đối soát':''}</div></div>
         <div>${money(o.orderValue)}</div>
         <div>${o.commissionStatus==='Không hợp lệ'?'0đ':money(o.cashback)}</div>
         <div><span class="status ${statusClass(o.orderStatus)}">${esc(o.orderStatus)}</span></div>
@@ -646,6 +720,28 @@ function renderUserTracking(){
       </div>
     </div>`;
   }).join(''):'<p class="muted">Chưa có user.</p>';
+}
+
+
+function renderTrackingActivity(){
+  const host=$('#trackingActivityList'),count=$('#trackingActivityCount');
+  if(!host||!count)return;
+  const accountMap=new Map((state.accounts||[]).map(ac=>[ac.id,ac]));
+  const rows=(state.clicks||[]).slice().sort((a,b)=>new Date(b.createdAt||0)-new Date(a.createdAt||0)).slice(0,100);
+  count.textContent=rows.length+' lượt';
+  host.innerHTML=rows.length?rows.map(e=>{
+    const ac=accountMap.get(e.userId);
+    const who=ac?(ac.name+' · '+(ac.username||ac.id)):e.userId;
+    const label=e.type==='paste_link'?'Dán link':'Mở Shopee';
+    const cls=e.type==='open_shopee'?'s-ok':'s-info';
+    return `<div class="ticket" style="margin-top:8px">
+      <div class="row" style="justify-content:space-between;gap:10px">
+        <div><b>${esc(who)}</b><div class="tiny">${new Date(e.createdAt||Date.now()).toLocaleString('vi-VN')}</div></div>
+        <span class="status ${cls}">${label}</span>
+      </div>
+      <div class="tiny" style="margin-top:7px;word-break:break-all">${esc(e.originalUrl||e.cleanUrl||'')}</div>
+    </div>`;
+  }).join(''):'<p class="muted">Chưa có hoạt động.</p>';
 }
 
 function saveUser(){
