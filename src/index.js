@@ -116,10 +116,13 @@ async function injectRuntimePatch(request, env, patchPath) {
       "const prodSb=window.supabase.createClient(PROD_SUPABASE_URL,PROD_SUPABASE_KEY,{auth:{storageKey:'shopee-cashback-admin-auth',persistSession:true,autoRefreshToken:true}});"
     );
   }
-  const version = "20260824-5";
+  const version = "20260824-6";
   let scriptTags = `<script src="${patchPath}?v=${version}"></script>`;
   if (patchPath === "/user-production-fix.js") {
     scriptTags += `<script src="/user-notification-fix.js?v=${version}"></script>`;
+  }
+  if (patchPath === "/admin-production-fix.js") {
+    scriptTags += `<script src="/admin-import-safety.js?v=${version}"></script>`;
   }
   if (!html.includes(`${patchPath}?v=${version}`)) {
     html = html.includes("</body>") ? html.replace("</body>", `${scriptTags}</body>`) : html + scriptTags;
@@ -137,7 +140,7 @@ export default {
       if (request.method !== "GET") return json({ok:false,error:"method_not_allowed"},405);
       return resolveShopee(url);
     }
-    if (request.method === "GET" || request.method === "HEAD") {
+    if (request.method === "GET") {
       if (url.pathname === "/" || url.pathname === "/index.html") return injectRuntimePatch(request,env,"/user-production-fix.js");
       if (url.pathname === "/admin" || url.pathname === "/admin/" || url.pathname === "/admin.html") return injectRuntimePatch(request,env,"/admin-production-fix.js");
     }
