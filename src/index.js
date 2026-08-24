@@ -268,7 +268,25 @@ async function injectRuntimePatch(request, env, patchPath) {
   if (!contentType.includes("text/html")) return assetResponse;
 
   let html = await assetResponse.text();
-  const scriptTag = `<script src="${patchPath}?v=20260824-1"></script>`;
+
+  // User and Admin live on the same origin. Supabase's default auth storage key
+  // would make both pages share and overwrite the same browser session.
+  // Give each app its own persistent session namespace.
+  if (patchPath === "/user-production-fix.js") {
+    html = html.replace(
+      "const sb=window.supabase.createClient(SUPABASE_URL,SUPABASE_PUBLISHABLE_KEY);",
+      "const sb=window.supabase.createClient(SUPABASE_URL,SUPABASE_PUBLISHABLE_KEY,{auth:{storageKey:'shopee-cashback-user-auth'}});"
+    );
+  }
+
+  if (patchPath === "/admin-production-fix.js") {
+    html = html.replace(
+      "const prodSb=window.supabase.createClient(PROD_SUPABASE_URL,PROD_SUPABASE_KEY);",
+      "const prodSb=window.supabase.createClient(PROD_SUPABASE_URL,PROD_SUPABASE_KEY,{auth:{storageKey:'shopee-cashback-admin-auth'}});"
+    );
+  }
+
+  const scriptTag = `<script src="${patchPath}?v=20260824-2"></script>`;
   if (!html.includes(scriptTag)) {
     html = html.includes("</body>")
       ? html.replace("</body>", `${scriptTag}</body>`)
