@@ -5,6 +5,8 @@ const ALLOWED_INPUT_HOSTS = new Set([
   "www.shopee.vn",
 ]);
 
+const PRODUCTION_SUPABASE_HOST = "jqzyytgzgpjpgbtuirmn.supabase.co";
+
 function json(data, status = 200) {
   return new Response(JSON.stringify(data), {
     status,
@@ -104,33 +106,51 @@ async function resolveShopee(requestUrl) {
   } catch { return json({ok:false,error:"resolve_failed"},502); }
 }
 
-async function injectRuntimePatch(request, env, patchPath) {
+function devNetworkGuardScript() {
+  return `<script>(function(){
+    const PROD_HOST=${JSON.stringify(PRODUCTION_SUPABASE_HOST)};
+    const nativeFetch=window.fetch.bind(window);
+    window.fetch=function(input,init){
+      try{
+        const raw=typeof input==='string'?input:(input&&input.url)||'';
+        const u=new URL(raw,location.href);
+        if(u.hostname===PROD_HOST){
+          console.warn('[DEV GUARD] Blocked Production Supabase request:',u.pathname);
+          return Promise.reject(new Error('DEV_MODE_BLOCKED_PRODUCTION_SUPABASE'));
+        }
+      }catch(e){ if(String(e&&e.message)==='DEV_MODE_BLOCKED_PRODUCTION_SUPABASE') return Promise.reject(e); }
+      return nativeFetch(input,init);
+    };
+    window.__SHOPEE_CASHBACK_MODE__='DEV';
+  })();</script>`;
+}
+
+async function injectDevSandbox(request, env) {
   const assetResponse = await env.ASSETS.fetch(request);
   if (!assetResponse.ok) return assetResponse;
   const contentType = assetResponse.headers.get("content-type") || "";
   if (!contentType.includes("text/html")) return assetResponse;
+
   let html = await assetResponse.text();
-  if (patchPath === "/admin-production-fix.js") {
-    html = html.replace(
-      "const prodSb=window.supabase.createClient(PROD_SUPABASE_URL,PROD_SUPABASE_KEY);",
-      "const prodSb=window.supabase.createClient(PROD_SUPABASE_URL,PROD_SUPABASE_KEY,{auth:{storageKey:'shopee-cashback-admin-auth',persistSession:true,autoRefreshToken:true}});"
-    );
+
+  // DEV has its own browser storage namespace even if someone later maps the same hostname locally.
+  html = html.replaceAll('shopeeCashbackProductionStateV1','shopeeCashbackDevStateV1');
+
+  // Guard is injected before any page scripts so Production Supabase cannot be contacted from DEV.
+  const guard = devNetworkGuardScript();
+  html = html.includes('</head>') ? html.replace('</head>', `${guard}</head>`) : guard + html;
+
+  // Do NOT inject any Production patch files on DEV.
+  const version='20260825-dev-1';
+  const sandboxTag=`<script src="/dev-sandbox.js?v=${version}"></script>`;
+  if(!html.includes('/dev-sandbox.js?v=')){
+    html = html.includes('</body>') ? html.replace('</body>', `${sandboxTag}</body>`) : html + sandboxTag;
   }
-  const version = "20260825-1";
-  let scriptTags = `<script src="${patchPath}?v=${version}"></script>`;
-  if (patchPath === "/user-production-fix.js") {
-    scriptTags += `<script src="/user-notification-fix.js?v=${version}"></script>`;
-    scriptTags += `<script src="/user-order-detail-fix.js?v=${version}"></script>`;
-  }
-  if (patchPath === "/admin-production-fix.js") {
-    scriptTags += `<script src="/admin-import-safety.js?v=${version}"></script>`;
-  }
-  if (!html.includes(`${patchPath}?v=${version}`)) {
-    html = html.includes("</body>") ? html.replace("</body>", `${scriptTags}</body>`) : html + scriptTags;
-  }
-  const headers = new Headers(assetResponse.headers);
-  headers.delete("content-length");
-  headers.set("cache-control","no-store");
+
+  const headers=new Headers(assetResponse.headers);
+  headers.delete('content-length');
+  headers.set('cache-control','no-store');
+  headers.set('x-shopee-cashback-mode','DEV');
   return new Response(html,{status:assetResponse.status,statusText:assetResponse.statusText,headers});
 }
 
@@ -142,8 +162,9 @@ export default {
       return resolveShopee(url);
     }
     if (request.method === "GET") {
-      if (url.pathname === "/" || url.pathname === "/index.html") return injectRuntimePatch(request,env,"/user-production-fix.js");
-      if (url.pathname === "/admin" || url.pathname === "/admin/" || url.pathname === "/admin.html") return injectRuntimePatch(request,env,"/admin-production-fix.js");
+      if (url.pathname === "/" || url.pathname === "/index.html" || url.pathname === "/admin" || url.pathname === "/admin/" || url.pathname === "/admin.html") {
+        return injectDevSandbox(request,env);
+      }
     }
     return env.ASSETS.fetch(request);
   },
