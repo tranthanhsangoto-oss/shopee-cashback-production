@@ -116,10 +116,11 @@ async function injectRuntimePatch(request, env, patchPath) {
       "const prodSb=window.supabase.createClient(PROD_SUPABASE_URL,PROD_SUPABASE_KEY,{auth:{storageKey:'shopee-cashback-admin-auth',persistSession:true,autoRefreshToken:true}});"
     );
   }
-  const version = "20260824-6";
+  const version = "20260825-1";
   let scriptTags = `<script src="${patchPath}?v=${version}"></script>`;
   if (patchPath === "/user-production-fix.js") {
     scriptTags += `<script src="/user-notification-fix.js?v=${version}"></script>`;
+    scriptTags += `<script src="/user-order-detail-fix.js?v=${version}"></script>`;
   }
   if (patchPath === "/admin-production-fix.js") {
     scriptTags += `<script src="/admin-import-safety.js?v=${version}"></script>`;
